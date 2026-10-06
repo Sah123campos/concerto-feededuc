@@ -1,0 +1,346 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', Arial, sans-serif;
+}
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Poppins', Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Imagens responsivas */
+img { 
+    max-width: 100%; 
+    height: auto; 
+}
+
+body {
+    background-image: url(/IMAGE/Portfólio\ Feed-Educ.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: white;
+}
+
+header {
+    background-color: #363538;
+    width: 100%;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.logo {
+    width: 64px;
+    height: auto;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    position: relative; 
+    padding-bottom: 4px;
+    transition: color 0.3s ease; 
+}
+
+
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #c574db;
+    transition: width 0.3s ease;
+}
+
+
+nav a:hover::after {
+    width: 100%;
+}
+
+
+nav a:hover {
+    color: #1ca8ac;
+}
+
+.feedback-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px #0001;
+    margin: 16px;
+    padding: 18px 20px;
+    min-width: 300px;
+    max-width: 400px;
+    display: inline-block;
+    vertical-align: top;
+}
+.feedback-title {
+    color: #1ca8ac;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 4px;
+}
+.feedback-subtitle {
+    color: #aaa;
+    font-size: 1em;
+    margin-bottom: 8px;
+}
+.feedback-message {
+    color: #222;
+    font-size: 1.1em;
+}
+.separator-line {
+    background-color: #c574db;
+}
+
+/* Estilos para posicionamento dos widgets de acessibilidade */
+/* VLibras Widget - Apenas posicionamento, sem dimensões fixas */
+[vw], .vw-widget {
+    position: fixed !important;
+    z-index: 1000 !important;
+    transform: none !important;
+}
+
+/* Permitir que a interface interna do VLibras funcione */
+.vw-plugin__wrapper {
+    position: relative !important;
+    z-index: 1001 !important;
+}
+
+/* UserWay Widget - Seletores mais específicos */
+#userway-widget, 
+[data-userway-account],
+.userway-widget,
+div[data-userway-account],
+div.userway-widget,
+iframe[src*="userway"],
+div[id*="userway"] {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Forçar posicionamento específico para VLibras - sem dimensões fixas */
+div[vw] {
+    position: fixed !important;
+    z-index: 1000 !important;
+    transform: none !important;
+}
+
+/* Forçar posicionamento específico para UserWay */
+div[data-userway-account],
+div.userway-widget,
+iframe[src*="userway"],
+div[id*="userway"] {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+        padding: 10px 15px;
+    }
+
+    .logo {
+        width: 50px;
+    }
+
+    .logo-container {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+
+    nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    nav a {
+        font-size: 16px;
+    }
+
+    #mural {
+        padding: 10px;
+    }
+
+    .feedback-card {
+        margin: 10px auto;
+        min-width: 280px;
+        max-width: 100%;
+        padding: 14px 16px;
+    }
+
+    .feedback-title {
+        font-size: 1em;
+    }
+
+    .feedback-subtitle {
+        font-size: 0.9em;
+    }
+
+    .feedback-message {
+        font-size: 0.95em;
+    }
+
+    .feedback-preview {
+        font-size: 0.85em;
+    }
+
+    [vw] {
+        right: 70px !important;
+        top: 10px !important;
+        transform: scale(0.75) !important;
+    }
+    
+    #userway-widget, 
+    [data-userway-account],
+    .userway-widget,
+    div[data-userway-account],
+    div.userway-widget,
+    iframe[src*="userway"],
+    div[id*="userway"] {
+        top: 10px !important;
+        right: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .feedback-card {
+        min-width: 260px;
+        padding: 12px 14px;
+    }
+
+    .feedback-title {
+        font-size: 0.95em;
+    }
+
+    .feedback-subtitle {
+        font-size: 0.85em;
+    }
+
+    nav a {
+        font-size: 14px;
+    }
+}
+
+
+.admin-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-responder { 
+    background: #c574db; 
+    color: white; 
+}
+.btn-responder:hover { 
+    background: #a85bc0; 
+}
+
+.btn-status { 
+    background: #6c757d; 
+    color: white; 
+}
+.btn-status:hover { 
+    background: #545b62; 
+}
+
+.feedback-card-privado .action-btn {
+    background: #8a7a9a;
+    color: white;
+}
+.feedback-card-privado .action-btn:hover {
+    background: #6b5b7a;
+}
+
+.feedback-response {
+    background: #f8f9fa;
+    border-left: 4px solid #28a745;
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 6px;
+}
+
+.response-header {
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+/* Estilo para o botão de logout no header */
+.header-logout-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: auto;
+    transition: background 0.3s ease;
+}
+
+.header-logout-btn:hover {
+    background: #c82333;
+}
+
+/* Mobile: ajustar botão de logout */
+@media (max-width: 768px) {
+    .header-logout-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        margin-left: 10px;
+    }
+    
+    nav {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+}

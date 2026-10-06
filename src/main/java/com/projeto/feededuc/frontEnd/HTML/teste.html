@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retângulo com Gradiente</title>
+
+    <style>
+        :root {
+            --dark: #2b2b2b;   /* cor das laterais escuras */
+            --light: #f6f6f6;  /* cor do centro */
+            --height: 120px;   /* altura do retângulo */
+            --radius: 10px;    /* borda arredondada */
+        }
+
+        body {
+            background: #e8e8e8;
+            font-family: 'Poppins', Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .strip {
+            width: 100%;
+            max-width: 900px;
+            height: var(--height);
+            border-radius: var(--radius);
+            background: linear-gradient(
+                to right,
+                var(--dark) 0%,
+                rgba(43, 43, 43, 0.85) 10%,
+                var(--light) 50%,
+                rgba(43, 43, 43, 0.85) 90%,
+                var(--dark) 100%
+            );
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.15);
+        }
+
+        body{
+            background-image: url(caminh);
+            background-size: cover;
+            background-repeat: no-repeat;
+            height: 100vh;
+            width: 100vw;
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+
+    <div class="strip"></div>
+
+    <!-- Adding VLibras and UserWay accessibility widgets -->
+    <div vw class="enabled" role="complementary" aria-label="Tradutor VLibras">
+        <div vw-access-button class="active" aria-label="Abrir tradutor VLibras"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Força a inicialização do VLibras
+            const vlibrasScript = document.createElement('script');
+            vlibrasScript.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+            vlibrasScript.onload = function() {
+                new window.VLibras.Widget('https://vlibras.gov.br/app');
+            };
+            document.body.appendChild(vlibrasScript);
+
+            // Força a inicialização do UserWay
+            const userwayScript = document.createElement('script');
+            userwayScript.src = 'https://cdn.userway.org/widget.js';
+            userwayScript.setAttribute('data-language', 'pt-br');
+            userwayScript.setAttribute('data-position', 'top-right');
+            userwayScript.setAttribute('data-background', '#005792');
+            userwayScript.setAttribute('data-size', '48px');
+            userwayScript.setAttribute('data-mobile', 'true');
+            userwayScript.setAttribute('data-hide-mobile', 'false');
+            userwayScript.setAttribute('data-close-esc', 'true');
+            userwayScript.setAttribute('data-close-outside', 'true');
+            document.body.appendChild(userwayScript);
+        });
+    </script>
+
+</body>
+</html>

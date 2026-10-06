@@ -1,0 +1,665 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body, html {
+    
+    width: 100%;
+    height: 100%; 
+    overflow-x: hidden;  
+    font-family: 'Poppins', Arial, sans-serif;
+    background-color: #3e3d3e;
+    color: #111827; /* texto padrão para tema claro */
+}
+
+/* Quando o tema escuro estiver ativo (document.documentElement.classList contém 'dark') */
+html.dark body {
+    color:#363538; /* texto claro para tema escuro */
+}
+
+/* Garante que cartões com bg-white exibam texto escuro no tema claro */
+.bg-white {
+    /* Forçar cor de fundo dos cartões para o tom do layout, usando !important para sobrescrever utilitários como Tailwind */
+    background-color: #3e3d3e !important;
+    color: #ffffff !important;
+}
+
+/* Se estiver em modo escuro, permite que cartões que deixaram bg-white (por lógica) herdem cor clara */
+html.dark .bg-white {
+    color: #007a7e;
+}
+
+
+
+header {
+    background-color: #3e3d3e;
+    width: 100%;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.logo {
+    width: 64px;
+    height: auto;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    position: relative; 
+    padding-bottom: 4px;
+    transition: color 0.3s ease; 
+}
+
+
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #007a7e;
+    transition: width 0.3s ease;
+}
+
+
+nav a:hover::after {
+    width: 100%;
+}
+
+
+nav a:hover {
+    color: #007a7e;
+}
+.image-container {
+    position: relative;
+    width: 100%;
+    height: clamp(250px, 40vh, 600px);
+    min-height: 250px;
+    overflow: hidden;
+    margin-bottom: 0;
+    background-image: url('../IMAGE/fundoTelaInicial.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Mantém .image-container::before sem overlay — mostra a imagem original */
+.image-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    z-index: 1;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #3e3d3e;
+    width: 100%;
+    padding: 20px 15px; 
+    box-sizing: border-box;
+    margin-top: -10px; 
+}
+
+.left, .right {
+    flex: 1;
+    padding: 15px; 
+    min-width: 300px;
+}
+
+.separator-line {
+    width: 100%;
+    height: 3px;
+    background-color: #007a7e;
+    margin: 0 auto;
+}
+
+
+.divider {
+    width: 2px;
+    min-height: 200px;
+    background-color: #3e3d3e;
+    margin: 0 20px;
+    align-self: center;
+}
+
+
+@media (max-width: 768px) {
+    .divider {
+        width: 80%;
+        height: 2px;
+        min-height: auto;
+        margin: 20px auto;
+    }
+}
+
+.left h2 {
+    color: #007a7e;
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+/* Define a cor dos títulos <h3> nos containers */
+.container h3 {
+    color: #007a7e;
+}
+
+
+
+@media (max-width: 768px) {
+    .image-container {
+        height: 250px; 
+    }
+    
+    .container {
+        margin-top: -5px; 
+        padding: 15px 10px;
+    }
+}
+
+
+.feedback-btn {
+    background-color: #007a7e;
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-weight: bold;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 300px;
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    text-align: center;
+}
+
+.feedback-btn:hover {
+    background-color: #00595b;
+}
+
+
+a {
+    text-decoration: none;
+    color: #007a7e;
+}
+
+
+@media (min-width: 768px) {
+    .divider {
+        width: 2px;
+        height: 100px;
+        margin: 0 20px;
+        display: block;
+    }
+    
+    .feedback-btn {
+        width: auto;
+    }
+}
+
+@media (max-width: 767px) {
+    .left, .right {
+        flex: 100%;
+    }
+    
+    .left p {
+        text-align: left;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .divider {
+        width: 80%;
+        height: 2px;
+        margin: 20px 0;
+    }
+
+    .left, .right {
+        padding: 10px;
+    }
+
+    .left p, .right p {
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .image-container {
+        height: 250px;
+    }
+
+    .logo {
+        width: 50px;
+    }
+
+    header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-container {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+/* Estilos para posicionamento dos widgets de acessibilidade */
+/* VLibras Widget - Apenas posicionamento, sem dimensões fixas */
+[vw], .vw-widget {
+    position: fixed !important;
+    z-index: 1000 !important;
+    transform: none !important;
+}
+
+/* Permitir que a interface interna do VLibras funcione */
+.vw-plugin__wrapper {
+    position: relative !important;
+    z-index: 1001 !important;
+}
+
+/* Garantir que a interface interna do VLibras funcione corretamente */
+.vw-plugin__wrapper * {
+    position: relative !important;
+    z-index: 1002 !important;
+}
+
+/* Permitir que o painel interno do VLibras se expanda */
+.vw-plugin__wrapper .vw-plugin-top-wrapper {
+    position: absolute !important;
+    z-index: 1003 !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+/* UserWay Widget - Seletores mais específicos */
+#userway-widget, 
+[data-userway-account],
+.userway-widget,
+div[data-userway-account],
+div.userway-widget,
+iframe[src*="userway"],
+div[id*="userway"] {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Forçar posicionamento específico para VLibras - sem dimensões fixas */
+div[vw] {
+    position: fixed !important;
+    z-index: 1000 !important;
+    transform: none !important;
+}
+
+/* Forçar posicionamento específico para UserWay */
+div[data-userway-account],
+div.userway-widget,
+iframe[src*="userway"],
+div[id*="userway"] {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Estilos aprimorados para o widget VLibras durante arraste */
+[vw].dragging {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 10000 !important;
+    transition: none !important;
+}
+
+[vw]:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Feedback visual para indicar que é arrastável */
+[vw]::before {
+    content: '≡';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    color: #007a7e;
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+[vw]:hover::before {
+    opacity: 1;
+}
+
+/* Estilos para o estado de arraste ativo */
+.vw-drag-active .vw-plugin__wrapper {
+    pointer-events: none;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+    [vw], .vw-widget {
+        /* Remover dimensões fixas para permitir interface interna */
+        position: fixed !important;
+        z-index: 1000 !important;
+        transform: none !important;
+    }
+    
+    #userway-widget, 
+    [data-userway-account],
+    .userway-widget,
+    div[data-userway-account],
+    div.userway-widget,
+    iframe[src*="userway"],
+    div[id*="userway"] {
+        top: 10px !important;
+        right: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    div[vw] {
+        /* Remover dimensões fixas para permitir interface interna */
+        position: fixed !important;
+        z-index: 1000 !important;
+        transform: none !important;
+    }
+    
+    div[data-userway-account],
+    div.userway-widget,
+    iframe[src*="userway"],
+    div[id*="userway"] {
+        top: 10px !important;
+        right: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    /* Ajustes para mobile - feedback visual menor */
+    [vw]::before {
+        font-size: 12px;
+        top: -12px;
+    }
+}
+
+/* Animações suaves para reposicionamento */
+.vw-position-transition {
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Indicador visual de limites da tela */
+@keyframes boundary-bounce {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.vw-boundary-warning {
+    animation: boundary-bounce 0.3s ease;
+}
+
+/* Imagens responsivas */
+img { 
+    max-width: 100%; 
+    height: auto; 
+}
+
+/* Área roxa com imagem de fundo (aplicar somente onde necessário adicionando a classe .purple-panel) */
+.purple-panel {
+    /* imagem do anexo (relativo ao arquivo CSS) */
+    background-image: url('../IMAGE/fundoTelaInicial.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 12px;
+    padding: 24px;
+    /* mantém um leve sombreado interno para contraste dos textos, sem alterar a cor da imagem */
+    box-shadow: inset 0 6px 18px rgba(0,0,0,0.18);
+}
+
+/* Faz os cartões parecerem elevados acima da imagem */
+.purple-panel .rounded-xl {
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Alvo específico para cartões gerados com Tailwind (classe com dois estados: bg-white e dark:bg-gray-800)
+   nota: classes com ':' precisam de escape no seletor CSS */
+.purple-panel .bg-white,
+.purple-panel .dark\:bg-gray-800 {
+    /* mantém o fundo do cartão (o Tailwind já aplica), reforça altura/elevação visual e força a cor correta */
+    position: relative;
+    z-index: 2;
+    background-color: #3e3d3e !important;
+    color: #ffffff !important;
+}
+
+/* Ajuste responsivo — reduz intensidade da sombra em telas pequenas */
+@media (max-width: 768px) {
+    .purple-panel {
+        padding: 16px;
+        background-position: center top;
+        background-size: cover;
+        border-radius: 8px;
+        box-shadow: inset 0 6px 30px rgba(0,0,0,0.35);
+    }
+
+    .purple-panel .rounded-xl {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+    }
+}
+
+/* Define a fonte moderna para o corpo */
+body, html {
+    font-family: 'Poppins', Arial, sans-serif;
+}
+
+/* Ajusta as cores dos textos principais */
+h2 {
+    color: #007a7e; /* Branco para contraste com o fundo */
+    font-weight: 700; /* Deixa o título mais destacado */
+}
+
+p {
+    color: #007a7e; /* Cinza claro para subtítulos e parágrafos */
+    font-weight: 400; /* Mantém leveza no texto */
+}
+
+/* Ajusta o estilo do papel do usuário */
+#user-info span {
+    color: #007a7e; /* Azul moderno para destaque */
+    font-weight: 600;
+}
+
+/* Mantém pequenas customizações específicas da SPA (apenas o necessário) */
+.title-font { 
+    font-family: 'Poppins', Arial, sans-serif; 
+}
+
+/* Ajustes visuais para o cartão de login */
+#login-card {
+    font-family: 'Poppins', Arial, sans-serif;
+    background-color: #3e3d3e;
+    color: #007a7e;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+#login-card h2 {
+    color: #007a7e;
+}
+
+#login-card input {
+    border-radius: 10px;
+    border: 1px solid #4a4a4a;
+    background: #f5f5f5;
+    color: #000000;
+}
+#login-card button[type="submit"] {
+    background-color: #007a7e;
+    color: rgb(88, 88, 88);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-weight: 700;
+}
+
+/* Garante overlay do auth-page sem alterar cores dos containers */
+#auth-page {
+    background: rgba(54, 53, 56, 0.92);
+}
+
+/* Theme variables: padrão escuro. Adiciona suporte para html.light (tema claro) */
+:root {
+    --bg: #3e3d3e;
+    --card-bg: #3e3d3e;
+    --text: #ffffff;
+    --muted-text: #c7c7c7;
+    --accent: #007a7e;
+    --header-bg: #3e3d3e;
+}
+
+/* Quando a página receber html.light, troca para tema claro */
+html.light {
+    --bg: #ffffff;
+    --card-bg: #ffffff;
+    --text: #000000;
+    --muted-text: #6b7280;
+    --accent: #007a7e;
+    --header-bg: #ffffff;
+}
+
+/* Garantir que o tema padrão (sem classe) seja o escuro */
+body, html {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+/* Forçar header e containers a usarem as variáveis de cor */
+header {
+    background-color: var(--header-bg) !important;
+}
+
+.container {
+    /* ...existing code... */
+    background-color: var(--bg) !important;
+}
+
+.divider {
+    /* ...existing code... */
+    background-color: var(--bg) !important;
+}
+
+/* Cartões (quando o tema claro for ativado, eles ficarão brancos) */
+.bg-white {
+    background-color: var(--card-bg) !important;
+    color: var(--text) !important;
+}
+
+.purple-panel .bg-white,
+.purple-panel .dark\:bg-gray-800 {
+    position: relative;
+    z-index: 2;
+    background-color: var(--card-bg) !important;
+    color: var(--text) !important;
+}
+
+/* Ajustes adicionais de cores usando variáveis */
+nav a { color: var(--text); }
+nav a:hover { color: var(--accent); }
+.left h2, .container h3 { color: var(--accent); }
+p { color: var(--accent); }
+#user-info span { color: var(--accent); }
+#login-card { background-color: var(--card-bg) !important; color: var(--accent) !important; }
+
+/* Remover transições para evitar delay ao alternar tema */
+html, body, header, #sidebar, nav a, .nav-item a, .purple-panel, .bg-white, .container, #page-content, .feedback-btn {
+    transition: none !important;
+}
+
+/* Remover fundo cinza com opacidade baixa */
+.purple-panel {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Ajustar cor do título "Bem-vindo" para branco */
+h1 {
+    color: #ffffff !important;
+}
+
+/* Ajustar cor do texto abaixo do dropdown */
+.dropdown-text {
+    color: #000000 !important;
+}
+
+/* Estilo para botão de submit */
+button[type="submit"] {
+    background-color: #007a7e !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+button[type="submit"]:hover {
+    background-color: #00595b !important;
+}
+
+/* Garante que classes Tailwind não sobrescrevam */
+.bg-primary {
+    background-color: #007a7e !important;
+}
+
+.hover\:bg-primary-dark:hover {
+    background-color: #00595b !important;
+}

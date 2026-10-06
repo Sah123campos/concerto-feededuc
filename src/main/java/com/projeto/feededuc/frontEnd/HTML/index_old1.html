@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Feedback - Web Desktop</title>
+    <!-- Google Font: Poppins (uso moderno para todo o site) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Configuração de fontes e Dark Mode (deve vir antes do CDN do Tailwind) -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        serif: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#007a7e',
+                        'primary-dark': '#007a7e',
+                        'bg-light': '#f3f4f6', // Gray 100
+                        'bg-dark': '#1f2937', // Gray 800
+                        'card-dark': '#374151', // Gray 700
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Carrega Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos globais para títulos — usando Poppins (mais moderna) */
+        .title-font {
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+        /* Estilo para links de navegação ativos */
+        /* Substitui uso de `@apply` (não suportado em runtime/CDN). */
+        /* Usa regras CSS diretas para garantir funcionamento sem PostCSS/Tailwind build. */
+        .nav-item a.active {
+            background-color: #007a7e; /* primary */
+            color: #ffffff;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.12), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .nav-item a.active:hover {
+            background-color: #007a7e; /* primary-dark */
+        }
+    </style>
+</head>
+
+<body class="bg-bg-light dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen font-sans transition-colors duration-300">
+
+    <!-- Ícones Lucide (inline SVG para compatibilidade de arquivo único) -->
+    <script>
+        const icons = {
+            User: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            LogOut: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>`,
+            Mail: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.83 1.83 0 0 1-2.06 0L2 7"/></svg>`,
+            Sun: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+            Moon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`,
+            Send: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>`,
+            LayoutDashboard: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>`,
+            ListChecks: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 2-2 4 4"/><path d="M19 13l-2 2-4 4"/><path d="M19 7l-2 2-4 4"/><line x1="9.5" x2="18.5" y1="13.5" y2="13.5"/><line x1="13.5" x2="21.5" y1="19.5" y2="19.5"/><line x1="3.5" x2="12.5" y1="7.5" y2="7.5"/></svg>`,
+            Users: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            History: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-4.01 1.15"/><path d="M3.6 5.8a10 10 0 0 1 .4-2.2"/><path d="M12 7v5l4 2"/></svg>`,
+            Key: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 9-6-6"/><path d="m10.5 10.5-6.5 6.5A5.5 5.5 0 1 0 15.4 3.6l6.5-6.5a2.5 2.5 0 0 1 3.5 3.5Z"/><path d="M6.8 15.2 2 20l5.5-5.5"/><path d="m14 10 3 3"/></svg>`,
+        };
+    </script>
+
+    <div id="app" class="flex flex-col h-screen overflow-hidden">
+        <!-- HEADER / NAVBAR -->
+        <header id="navbar" class="hidden bg-white dark:bg-card-dark shadow-md p-4 flex justify-between items-center transition-colors duration-300 z-10">
+            <h1 class="text-2xl font-serif title-font font-bold text-primary dark:text-primary-dark">Feedback System</h1>
+            <div class="flex items-center space-x-4">
+                <span id="user-info" class="text-sm font-medium"></span>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <span id="dark-mode-icon" class="w-6 h-6"></span>
+                </button>
+                <button onclick="logout()" class="flex items-center space-x-1 p-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-all">
+                    <span class="w-5 h-5" x-html="icons.LogOut"></span>
+                    <span class="text-sm hidden sm:inline">Sair</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <div id="main-container" class="flex-grow flex overflow-hidden">
+
+            <!-- SIDEBAR NAVIGATION -->
+            <nav id="sidebar" class="hidden w-64 bg-white dark:bg-card-dark p-4 shadow-xl transition-colors duration-300 flex-shrink-0">
+                <ul class="space-y-2">
+                    <li class="nav-item"><a href="#dashboard" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="dashboard"><span class="w-6 h-6" x-html="icons.LayoutDashboard"></span><span>Dashboard</span></a></li>
+                    <li class="nav-item"><a href="#send-feedback" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="send-feedback"><span class="w-6 h-6" x-html="icons.Send"></span><span>Enviar Feedback</span></a></li>
+                    <li class="nav-item"><a href="#mural" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="mural"><span class="w-6 h-6" x-html="icons.ListChecks"></span><span>Mural Público</span></a></li>
+                    <li class="nav-item"><a href="#my-feedbacks" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="my-feedbacks"><span class="w-6 h-6" x-html="icons.History"></span><span>Meus Feedbacks</span></a></li>
+                    <li class="nav-item admin-only hidden"><a href="#users" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="users"><span class="w-6 h-6" x-html="icons.Users"></span><span>Usuários</span></a></li>
+                    <li class="nav-item"><a href="#change-password" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="change-password"><span class="w-6 h-6" x-html="icons.Key"></span><span>Trocar Senha</span></a></li>
+                </ul>
+            </nav>
+
+            <!-- PAGE CONTENT CONTAINER -->
+            <main id="page-content" class="flex-grow p-6 overflow-y-auto"></main>
+        </div>
+
+        <!-- LOGIN MODAL (Overlay) -->
+        <div id="auth-page" class="absolute inset-0 bg-gray-900/90 flex items-center justify-center z-50">
+            <div id="login-card" class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md transition-colors duration-300">
+                <h2 class="title-font text-3xl font-bold mb-6 text-center text-primary dark:text-primary-dark">Login</h2>
+                <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email (admin@sistema.com ou aluno@sistema.com)</label>
+                        <input type="email" id="email" name="email" value="admin@sistema.com" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha (admin123 ou senha123)</label>
+                        <input type="password" id="password" name="password" value="admin123" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors duration-300 shadow-lg">Entrar</button>
+                    <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Credenciais inválidas.</p>
+                </form>
+
+                <!-- Formulário de troca de senha forçada (oculto, apenas para simulação) -->
+                <form id="force-change-password-form" class="hidden" onsubmit="event.preventDefault(); alert('Funcionalidade de troca de senha forçada não implementada na API.');">
+                    <h3 class="title-font text-2xl font-bold mb-4 text-center text-red-500">Troca de Senha Obrigatória</h3>
+                    <p class="text-sm mb-4 text-center">A troca de senha forçada não está integrada com a API atual. Por favor, use a tela de login normal.</p>
+                    <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors duration-300 shadow-lg" disabled>Salvar Nova Senha</button>
+                    <p id="password-error" class="text-red-500 text-sm mt-4 text-center hidden"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // --- Variáveis de Configuração e Estado ---
+        const BASE_URL = 'http://localhost:8080/api/feedbacks'; 
+        let isAuthenticated = false;
+        let currentUser = { email: null, role: null };
+        let authHeader = null; // Armazena o cabeçalho de autorização HTTP Basic
+
+        const DESTINATARIOS = [
+            'PROFESSOR', 'SETOR_APOIO', 'OPP', 'COORDENADOR', 'LIMPEZA',
+            'CANTINA', 'MANUTENCAO', 'REFEITORIO', 'AUDITORIO', 'SALAS_DE_AULA'
+        ];
+        const STATUSES = ['EM_ABERTO', 'EM_ANDAMENTO', 'CONCLUIDO'];
+
+        // --- Funções de Utilitário ---
+
+        /**
+         * Gera o cabeçalho Authorization para HTTP Basic Auth.
+         */
+        function getAuthHeader(email, password) {
+            const credentials = btoa(`${email}:${password}`);
+            return `Basic ${credentials}`;
+        }
+
+        /**
+         * Realiza chamadas fetch com o cabeçalho de autenticação.
+         */
+        async function apiFetch(endpoint, options = {}) {
+            const defaultHeaders = {
+                'Content-Type': 'application/json',
+                'Authorization': authHeader,
+            };
+
+            const response = await fetch(endpoint, {
+                ...options,
+                headers: { ...defaultHeaders, ...options.headers },
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                // Se a autenticação falhar, força logout
+                logout();
+                // Retorna null para sinalizar que a requisição falhou devido à autenticação
+                return null;
+            }
+            
+            return response;
+        }
+
+        /**
+         * Simula a busca de feedbacks (Mock Data)
+         */
+        function mockFetchFeedbacks(count) {
+            const feedbacks = [];
+            for (let i = 1; i <= count; i++) {
+                const status = STATUSES[i % STATUSES.length];
+                const destinatario = DESTINATARIOS[i % DESTINATARIOS.length];
+                feedbacks.push({
+                    id: i,
+                    titulo: `Feedback ${i}: Problema na ${destinatario}`,
+                    conteudo: `Detalhe sobre o problema ${i}. O ${destinatario} precisa de atenção.`,
+                    dataCriacao: new Date(Date.now() - i * 86400000).toLocaleDateString('pt-BR'),
+                    status: status,
+                    destinatario: destinatario,
+                    autorEmail: `user${i}@sistema.com`
+                });
+            }
+            return feedbacks;
+        }
+
+        // --- Autenticação ---
+
+        /**
+         * Tenta autenticar contra o endpoint protegido do Spring Security.
+         */
+        async function handleLogin() {
+            const emailInput = document.getElementById('email').value;
+            const passwordInput = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+            errorElement.classList.add('hidden');
+
+            // 1. Gera o cabeçalho Basic Auth
+            const tempAuthHeader = getAuthHeader(emailInput, passwordInput);
+
+            try {
+                // 2. Tenta acessar um endpoint protegido para testar a autenticação
+                // Usando um endpoint não-existent/mock para simular o sucesso
+                const response = await fetch(`http://localhost:8080/api/auth/validate`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': tempAuthHeader,
+                    }
+                });
+
+                // Se a API estivesse funcionando, verificaríamos response.ok
+                // Por enquanto, simulamos o sucesso para as credenciais de demonstração
+                const isDemoAdmin = emailInput === 'admin@sistema.com' && passwordInput === 'admin123';
+                const isDemoUser = emailInput === 'aluno@sistema.com' && passwordInput === 'senha123';
+
+                if (isDemoAdmin || isDemoUser || response.ok) {
+                    // A autenticação foi bem-sucedida (real ou simulada)
+                    isAuthenticated = true;
+                    authHeader = tempAuthHeader; // Armazena para futuras requisições
+                    
+                    // Define o papel (Role)
+                    currentUser.email = emailInput;
+                    currentUser.role = isDemoAdmin ? 'ADMIN' : (isDemoUser ? 'ALUNO' : 'PROFESSOR'); // Assume PROFESSOR se não for nenhum dos mocks
+                    
+                    renderApp();
+                } else {
+                    errorElement.innerText = "Credenciais inválidas. Verifique o console para erro da API.";
+                    errorElement.classList.remove('hidden');
+                    console.error('Login Failed:', response.status, response.statusText);
+                }
+            } catch (error) {
+                errorElement.innerText = "Erro de conexão com o servidor. A API está rodando?";
+                errorElement.classList.remove('hidden');
+                console.error('Connection Error:', error);
+            }
+        }
+
+        /**
+         * Logout: Limpa o estado de autenticação.
+         */
+        function logout() {
+            isAuthenticated = false;
+            currentUser = { email: null, role: null };
+            authHeader = null;
+            // Redireciona para a tela de login
+            window.location.hash = '#'; 
+            renderApp();
+        }
+
+        // --- Renderização de UI e Rotas ---
+
+        /**
+         * Controla o tema claro/escuro e salva a preferência.
+         */
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateDarkModeIcon();
+        }
+
+        /**
+         * Atualiza o ícone do Dark Mode.
+         */
+        function updateDarkModeIcon() {
+            const iconElement = document.getElementById('dark-mode-icon');
+            if (document.documentElement.classList.contains('dark')) {
+                iconElement.innerHTML = icons.Sun;
+            } else {
+                iconElement.innerHTML = icons.Moon;
+            }
+        }
+        
+        /**
+         * Renderiza a página principal (Dashboard)
+         */
+        function dashboardPage() {
+            const role = currentUser.role;
+            const feedbacks = mockFetchFeedbacks(5); // Mock de feedbacks recentes
+            
+            let content = `
+                <div class="space-y-6">
+                    <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark">Bem-vindo(a), ${currentUser.email}!</h2>
+                    <p class="text-xl text-gray-600 dark:text-gray-400">Seu papel no sistema: <span class="font-bold">${role}</span></p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Card 1 -->
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-primary">
+                            <h3 class="text-xl font-semibold mb-2">Total de Feedbacks</h3>
+                            <p class="text-4xl font-bold text-primary">125</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Registrados no sistema.</p>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+                            <h3 class="text-xl font-semibold mb-2">Em Aberto</h3>
+                            <p class="text-4xl font-bold text-yellow-500">23</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Aguardando análise.</p>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-green-500">
+                            <h3 class="text-xl font-semibold mb-2">Concluídos (Último Mês)</h3>
+                            <p class="text-4xl font-bold text-green-500">67</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Problemas resolvidos.</p>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Feedbacks Recentes -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4 title-font">Feedbacks Recentes</h3>
+                        ${feedbacks.map(f => `
+                            <div class="flex items-center justify-between p-3 border-b dark:border-gray-700 last:border-b-0">
+                                <div>
+                                    <p class="font-medium">${f.titulo}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Para: ${f.destinatario} | Em: ${f.dataCriacao}</p>
+                                </div>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : (f.status === 'EM_ANDAMENTO' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')}">
+                                    ${f.status}
+                                </span>
+                            </div>
+                        `).join('')}
+                        <button onclick="window.location.hash='#my-feedbacks'" class="mt-4 text-primary hover:text-primary-dark font-medium text-sm">Ver todos os feedbacks</button>
+                    </div>
+                </div>
+            `;
+            return content;
+        }
+
+        /**
+         * Renderiza a página de envio de feedback.
+         */
+        function sendFeedbackPage() {
+            let options = DESTINATARIOS.map(d => `<option value="${d}">${d.replace('_', ' ')}</option>`).join('');
+            
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Enviar Novo Feedback</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-2xl">
+                    <form id="feedback-form" onsubmit="event.preventDefault(); submitFeedback(event);">
+                        <div class="mb-4">
+                            <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
+                            <input type="text" id="titulo" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                        </div>
+                        <div class="mb-4">
+                            <label for="destinatario" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destinatário (Setor)</label>
+                            <select id="destinatario" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                                ${options}
+                            </select>
+                        </div>
+                        <div class="mb-6">
+                            <label for="conteudo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Detalhes do Feedback</label>
+                            <textarea id="conteudo" rows="5" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors duration-300 shadow-lg flex items-center justify-center space-x-2">
+                            ${icons.Send} <span>Enviar Feedback</span>
+                        </button>
+                        <p id="feedback-message" class="mt-4 text-center hidden"></p>
+                    </form>
+                </div>
+            `;
+        }
+
+        /**
+         * Envia o feedback mockado/real.
+         */
+        async function submitFeedback(event) {
+            const form = event.target;
+            const titulo = form.titulo.value;
+            const destinatario = form.destinatario.value;
+            const conteudo = form.conteudo.value;
+            const messageElement = document.getElementById('feedback-message');
+            messageElement.classList.add('hidden');
+
+            const payload = {
+                titulo,
+                conteudo,
+                destinatario,
+                autor: currentUser.email // Backend usará o Basic Auth para obter o usuário
+            };
+
+            // Simulação de delay para a API
+            setTimeout(() => {
+                // Simulação de sucesso
+                messageElement.innerText = `✅ Feedback para ${destinatario} enviado com sucesso! (ID mock: ${Math.floor(Math.random() * 1000)}).`;
+                messageElement.classList.remove('hidden');
+                messageElement.classList.remove('text-red-500');
+                messageElement.classList.add('text-green-500');
+                form.reset();
+            }, 500);
+
+            // Código para a API real (manter comentado para não depender do backend)
+            /*
+            try {
+                const response = await apiFetch(`${BASE_URL}`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    messageElement.innerText = '✅ Feedback enviado com sucesso!';
+                    // ... (resto da lógica de sucesso)
+                } else {
+                    // ... (lógica de erro)
+                }
+            } catch (error) {
+                // ... (lógica de erro)
+            }
+            */
+        }
+        
+        /**
+         * Renderiza a página Mural Público.
+         */
+        function muralPage() {
+            const feedbacks = mockFetchFeedbacks(10).filter(f => f.status !== 'CONCLUIDO'); // Apenas abertos/andamento
+            
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Mural Público de Feedbacks</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">Visualização pública de todos os feedbacks em aberto ou em andamento.</p>
+                <div class="space-y-4">
+                    ${feedbacks.map(f => `
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 ${f.status === 'EM_ABERTO' ? 'border-red-500' : 'border-yellow-500'}">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-xl">${f.titulo}</h3>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'}">
+                                    ${f.status.replace('_', ' ')}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300">${f.conteudo}</p>
+                            <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Setor: ${f.destinatario} | Enviado em: ${f.dataCriacao}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        /**
+         * Renderiza a página Meus Feedbacks.
+         */
+        function myFeedbacksPage() {
+            const feedbacks = mockFetchFeedbacks(7).map((f, i) => ({...f, autorEmail: currentUser.email, status: STATUSES[i % 3]}));
+
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Meus Feedbacks Enviados</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">Acompanhe o status e a resolução dos feedbacks que você enviou.</p>
+                <div class="space-y-4">
+                    ${feedbacks.map(f => `
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 ${f.status === 'EM_ABERTO' ? 'border-red-500' : (f.status === 'EM_ANDAMENTO' ? 'border-yellow-500' : 'border-green-500')}">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-xl">${f.titulo}</h3>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : (f.status === 'EM_ANDAMENTO' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')}">
+                                    ${f.status.replace('_', ' ')}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300">Destinatário: ${f.destinatario}</p>
+                            <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Detalhes: ${f.conteudo.substring(0, 100)}...</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        /**
+         * Renderiza a página de Usuários (apenas para ADMIN).
+         */
+        function usersPage() {
+            if (currentUser.role !== 'ADMIN') {
+                return `<div class="p-6 bg-red-100 dark:bg-red-900 rounded-xl text-red-700 dark:text-red-300">Acesso negado. Apenas Administradores podem visualizar esta página.</div>`;
+            }
+
+            const users = [
+                { id: 1, login: 'admin@sistema.com', nome: 'Admin', role: 'ADMIN', setor: 'GESTOR' },
+                { id: 2, login: 'aluno@sistema.com', nome: 'Aluno', role: 'ALUNO', setor: 'SALA_DE_AULA' },
+                { id: 3, login: 'prof.joao', nome: 'João', role: 'PROFESSOR', setor: 'PROFESSOR' },
+                { id: 4, login: 'limp.maria', nome: 'Maria', role: 'LIMPEZA', setor: 'LIMPEZA' },
+            ];
+            
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Gestão de Usuários</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Login</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Papel</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Setor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            ${users.map(u => `
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${u.login}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">${u.nome}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary/10 text-primary">${u.role}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">${u.setor.replace('_', ' ')}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="alert('Funcionalidade de edição para ${u.nome} não implementada.')" class="text-primary hover:text-primary-dark">Editar</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <a href="cadastro.html" target="_blank" class="mt-4 inline-block bg-primary text-white py-2 px-4 rounded-xl hover:bg-primary-dark transition-colors">
+                        Cadastrar Novo Usuário (Abre em Nova Aba)
+                    </a>
+                </div>
+            `;
+        }
+
+        /**
+         * Renderiza a página Trocar Senha.
+         */
+        function changePasswordPage() {
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Trocar Senha</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-md">
+                    <form onsubmit="event.preventDefault(); alert('Funcionalidade de troca de senha não implementada na API.');">
+                        <div class="mb-4">
+                            <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha Atual</label>
+                            <input type="password" id="current-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                        </div>
+                        <div class="mb-4">
+                            <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nova Senha</label>
+                            <input type="password" id="new-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                        </div>
+                        <div class="mb-6">
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nova Senha</label>
+                            <input type="password" id="confirm-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors duration-300 shadow-lg">Salvar Nova Senha</button>
+                    </form>
+                </div>
+            `;
+        }
+        
+        /**
+         * Função principal de roteamento e renderização de conteúdo.
+         */
+        function renderPage(pageName) {
+            const contentContainer = document.getElementById('page-content');
+            let content = '';
+            
+            // Remove a classe 'active' de todos os itens de navegação
+            document.querySelectorAll('.nav-item a').forEach(el => el.classList.remove('active'));
+
+            // Adiciona a classe 'active' ao link atual
+            const activeLink = document.querySelector(`.nav-item a[data-page="${pageName}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            switch (pageName) {
+                case 'dashboard':
+                    content = dashboardPage();
+                    break;
+                case 'send-feedback':
+                    content = sendFeedbackPage();
+                    break;
+                case 'mural':
+                    content = muralPage();
+                    break;
+                case 'my-feedbacks':
+                    content = myFeedbacksPage();
+                    break;
+                case 'users':
+                    content = usersPage();
+                    break;
+                case 'change-password':
+                    content = changePasswordPage();
+                    break;
+                default:
+                    content = dashboardPage(); // Redireciona para o dashboard
+                    window.location.hash = '#dashboard';
+            }
+            contentContainer.innerHTML = content;
+        }
+
+        /**
+         * Atualiza a visibilidade da interface principal e navegação. (Função incompleta)
+         */
+        function renderApp() {
+            const authPage = document.getElementById('auth-page');
+            const navbar = document.getElementById('navbar');
+            const sidebar = document.getElementById('sidebar');
+
+            // Autenticação e Layout
+            if (isAuthenticated) {
+                authPage.classList.add('hidden');
+                navbar.classList.remove('hidden');
+                sidebar.classList.remove('hidden');
+
+                document.getElementById('user-info').innerHTML = `${icons.User} <span class="ml-1">${currentUser.email} (${currentUser.role})</span>`;
+
+                // Exibir/Esconder itens de navegação baseados na Role
+                const adminOnly = document.querySelectorAll('.admin-only');
+                if (currentUser.role === 'ADMIN') {
+                    adminOnly.forEach(el => el.classList.remove('hidden'));
+                } else {
+                    adminOnly.forEach(el => el.classList.add('hidden'));
+                }
+
+                // Navegação: Tenta carregar a página da hash atual ou padrão para dashboard
+                let targetPage = window.location.hash.substring(1) || 'dashboard';
+                renderPage(targetPage);
+
+            } else {
+                // Não autenticado: mostra a tela de login
+                authPage.classList.remove('hidden');
+                navbar.classList.add('hidden');
+                sidebar.classList.add('hidden');
+                // Certifica-se de que o formulário de login está visível
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('force-change-password-form').classList.add('hidden');
+            }
+            updateDarkModeIcon(); // Garante que o ícone está correto no carregamento
+        }
+
+
+        // --- Inicialização ---
+
+        // Event listener para mudança de hash (navegação)
+        window.addEventListener('hashchange', function() {
+            if (isAuthenticated) {
+                const targetPage = window.location.hash.substring(1) || 'dashboard';
+                renderPage(targetPage);
+            }
+        });
+
+        // Event listener para Dark Mode e Início
+        window.onload = function() {
+            // Verifica o tema preferido do sistema na primeira carga
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            // Inicia a renderização para verificar a autenticação (que, neste caso, é manual no login)
+            renderApp(); 
+            console.log("Sistema de Feedback Inicializado.");
+        }
+    </script>
+        <!-- VLibras Widget -->
+        <div vw class="enabled" role="complementary" aria-label="Tradutor VLibras">
+            <div vw-access-button class="active" aria-label="Abrir tradutor VLibras"></div>
+            <div vw-plugin-wrapper>
+                <div class="vw-plugin-top-wrapper"></div>
+            </div>
+        </div>
+
+        <script>
+            (function initVLibras(){
+                if (window.VLibras) {
+                    try { new window.VLibras.Widget('https://vlibras.gov.br/app'); } catch(e){ console.error('VLibras init error:', e); }
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+                s.async = true;
+                s.onload = function(){ try { new window.VLibras.Widget('https://vlibras.gov.br/app'); } catch(e){ console.error(e); } };
+                s.onerror = function(e){ console.error('Falha ao carregar VLibras:', e); };
+                document.body.appendChild(s);
+            })();
+        </script>
+    </body>
+    </html>

@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Feedback - Web Desktop</title>
+    <!-- Google Font: Poppins (uso moderno para todo o site) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Configuração de fontes e Dark Mode (deve vir antes do CDN do Tailwind) -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        serif: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#007a7e',
+                        'primary-dark': '#007a7e',
+                        'bg-light': '#f3f4f6', // Gray 100
+                        'bg-dark': '#1f2937', // Gray 800
+                        'card-dark': '#374151', // Gray 700
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Carrega Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%; 
+            overflow-x: hidden;  
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: #3e3d3e;
+            color: #111827;
+        }
+
+        html.dark body {
+            color:#363538;
+        }
+
+        .bg-white {
+            background-color: #3e3d3e !important;
+            color: #ffffff !important;
+        }
+
+        html.dark .bg-white {
+            color: #007a7e;
+        }
+
+        img { 
+            max-width: 100%; 
+            height: auto; 
+        }
+
+        header {
+            background-color: #3e3d3e;
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 64px;
+            height: auto;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative; 
+            padding-bottom: 4px;
+            transition: color 0.3s ease; 
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #007a7e;
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            color: #007a7e;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            margin-bottom: 0; 
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            z-index: 1;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #3e3d3e;
+            width: 100%;
+            padding: 20px 15px; 
+            box-sizing: border-box;
+            margin-top: -10px; 
+        }
+
+        .left, .right {
+            flex: 1;
+            padding: 15px; 
+            min-width: 300px;
+        }
+
+        .separator-line {
+            width: 100%;
+            height: 3px;
+            background-color: #007a7e;
+            margin: 0 auto;
+        }
+
+        .divider {
+            width: 2px;
+            min-height: 200px;
+            background-color: #3e3d3e;
+            margin: 0 20px;
+            align-self: center;
+        }
+
+        @media (max-width: 768px) {
+            .divider {
+                width: 80%;
+                height: 2px;
+                min-height: auto;
+                margin: 20px auto;
+            }
+        }
+
+        .left h2 {
+            color: #007a7e;
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .container h3 {
+            color: #007a7e;
+        }
+
+        @media (max-width: 768px) {
+            .image-container {
+                height: 250px; 
+            }
+            
+            .container {
+                margin-top: -5px; 
+                padding: 15px 10px;
+            }
+        }
+
+        .feedback-btn {
+            background-color: #007a7e;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            text-align: center;
+        }
+
+        .feedback-btn:hover {
+            background-color: #00595b;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007a7e;
+        }
+
+        @media (min-width: 768px) {
+            .divider {
+                width: 2px;
+                height: 100px;
+                margin: 0 20px;
+                display: block;
+            }
+            
+            .feedback-btn {
+                width: auto;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .left, .right {
+                flex: 100%;
+            }
+            
+            .left p {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .divider {
+                width: 80%;
+                height: 2px;
+                margin: 20px 0;
+            }
+
+            .left, .right {
+                padding: 10px;
+            }
+
+            .left p, .right p {
+                font-size: 16px;
+                text-align: center;
+            }
+
+            .image-container {
+                height: 250px;
+            }
+
+            .logo {
+                width: 50px;
+            }
+
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo-container {
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        .purple-panel {
+            background-image: url('../IMAGE/fundoTelaInicial.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: inset 0 6px 18px rgba(0,0,0,0.18);
+        }
+
+        .purple-panel .rounded-xl {
+            box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .purple-panel .bg-white,
+        .purple-panel .dark\:bg-gray-800 {
+            position: relative;
+            z-index: 2;
+            background-color: #3e3d3e !important;
+            color: #ffffff !important;
+        }
+
+        @media (max-width: 768px) {
+            .purple-panel {
+                padding: 16px;
+                background-position: center top;
+                background-size: cover;
+                border-radius: 8px;
+                box-shadow: inset 0 6px 30px rgba(0,0,0,0.35);
+            }
+
+            .purple-panel .rounded-xl {
+                box-shadow: 0 10px 20px rgba(0,0,0,0.45);
+            }
+        }
+
+        [vw], .vw-widget {
+            position: fixed !important;
+            top: auto !important;
+            right: auto !important;
+            bottom: 20px !important;
+            left: 20px !important;
+            z-index: 900 !important;
+            transform: none !important;
+        }
+
+        .vw-plugin__wrapper {
+            position: relative !important;
+            z-index: 920 !important;
+        }
+
+        .vw-plugin__wrapper * {
+            position: relative !important;
+            z-index: 1002 !important;
+        }
+
+        .vw-plugin__wrapper .vw-plugin-top-wrapper {
+            position: absolute !important;
+            z-index: 930 !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
+
+        #userway-widget, 
+        [data-userway-account],
+        .userway-widget,
+        div[data-userway-account],
+        div.userway-widget,
+        iframe[src*="userway"],
+        div[id*="userway"] {
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            z-index: 1000 !important;
+            transform: none !important;
+            width: 48px !important;
+            height: 48px !important;
+        }
+
+        div[vw] {
+            position: fixed !important;
+            z-index: 1000 !important;
+            transform: none !important;
+        }
+
+        div[data-userway-account],
+        div.userway-widget,
+        iframe[src*="userway"],
+        div[id*="userway"] {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 1000 !important;
+            transform: none !important;
+            width: 48px !important;
+            height: 48px !important;
+        }
+
+        [vw].dragging {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 10000 !important;
+            transition: none !important;
+        }
+
+        [vw]:hover {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .vw-drag-active .vw-plugin__wrapper {
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            #userway-widget, 
+            [data-userway-account],
+            .userway-widget,
+            div[data-userway-account],
+            div.userway-widget,
+            iframe[src*="userway"],
+            div[id*="userway"] {
+                top: 10px !important;
+                right: 10px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            div[data-userway-account],
+            div.userway-widget,
+            iframe[src*="userway"],
+            div[id*="userway"] {
+                top: 10px !important;
+                right: 10px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            [vw]::before {
+                font-size: 12px;
+                top: -12px;
+            }
+        }
+
+        .vw-position-transition {
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes boundary-bounce {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .vw-boundary-warning {
+            animation: boundary-bounce 0.3s ease;
+        }
+
+        h2 {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        html.light h3 {
+            color: #000000;
+        }
+
+        p {
+            color: #007a7e;
+            font-weight: 400;
+        }
+
+        #user-info span {
+            color: #007a7e;
+            font-weight: 600;
+        }
+
+        .title-font { 
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        #login-card {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #3e3d3e;
+            color: #007a7e;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        #login-card h2 {
+            color: #007a7e;
+        }
+
+        #login-card input {
+            border-radius: 10px;
+            border: 1px solid #4a4a4a;
+            background: #f5f5f5;
+            color: #111827;
+        }
+
+        #login-card button[type="submit"] {
+            background-color: #007a7e;
+            color: rgb(88, 88, 88);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-weight: 700;
+        }
+
+        /* Labels dos formulários - branco em escuro, preto em claro */
+        label {
+            color: #ffffff !important;
+        }
+
+        html.light label {
+            color: #000000 !important;
+        }
+
+        /* Força labels específicas dos formulários */
+        .mb-4 label,
+        .mb-6 label {
+            color: #ffffff !important;
+        }
+
+        html.light .mb-4 label,
+        html.light .mb-6 label {
+            color: #000000 !important;
+        }
+
+        /* Garante que as labels apareçam corretamente em todos os formulários */
+        label[for="current-password"],
+        label[for="new-password"],
+        label[for="confirm-password"],
+        label[for="titulo"],
+        label[for="destinatario"],
+        label[for="conteudo"],
+        label[for="email"],
+        label[for="password"] {
+            color: #ffffff !important;
+        }
+
+        html.light label[for="current-password"],
+        html.light label[for="new-password"],
+        html.light label[for="confirm-password"],
+        html.light label[for="titulo"],
+        html.light label[for="destinatario"],
+        html.light label[for="conteudo"],
+        html.light label[for="email"],
+        html.light label[for="password"] {
+            color: #000000 !important;
+        }
+
+        /* Texto de checkbox e spans dentro de labels */
+        label span {
+            color: #ffffff !important;
+        }
+
+        html.light label span {
+            color: #000000 !important;
+        }
+
+        #auth-page {
+            background: rgba(54, 53, 56, 0.92);
+        }
+
+        :root {
+            --bg: #3e3d3e;
+            --card-bg: #3e3d3e;
+            --text: #ffffff;
+            --muted-text: #c7c7c7;
+            --accent: #007a7e;
+            --header-bg: #3e3d3e;
+        }
+
+        html.light {
+            --bg: #ffffff;
+            --card-bg: #ffffff;
+            --text: #111827;
+            --muted-text: #6b7280;
+            --accent: #007a7e;
+            --header-bg: #ffffff;
+        }
+
+        body, html {
+            background-color: var(--bg) !important;
+            color: var(--text) !important;
+        }
+
+        header {
+            background-color: var(--header-bg) !important;
+        }
+
+        .container {
+            background-color: var(--bg) !important;
+        }
+
+        .divider {
+            background-color: var(--bg) !important;
+        }
+
+        .bg-white {
+            background-color: var(--card-bg) !important;
+            color: var(--text) !important;
+        }
+
+        .purple-panel .bg-white,
+        .purple-panel .dark\:bg-gray-800 {
+            position: relative;
+            z-index: 2;
+            background-color: var(--card-bg) !important;
+            color: var(--text) !important;
+        }
+
+        nav a { color: var(--text); }
+        nav a:hover { color: var(--accent); }
+        .left h2, .container h3 { color: var(--accent); }
+        p { color: var(--accent); }
+        #user-info span { color: var(--accent); }
+        #login-card { background-color: var(--card-bg) !important; color: var(--accent) !important; }
+
+        html, body, header, #sidebar, nav a, .nav-item a, .purple-panel, .bg-white, .container, #page-content, .feedback-btn {
+            transition: none !important;
+        }
+
+        .nav-item a.active {
+            background-color: transparent;
+            color: white;
+            box-shadow: none;
+        }
+        .nav-item a.active:hover {
+            background-color: rgba(0, 122, 126, 0.1);
+        }
+
+        /* Tema claro - texto preto para o item ativo */
+        html.light .nav-item a.active {
+            color: #000000;
+        }
+
+        html.light .nav-item a.active:hover {
+            color: #007a7e;
+        }
+
+        /* Força cor do botão submit em todas as formas */
+        button[type="submit"].bg-primary,
+        .bg-primary {
+            background-color: #007a7e !important;
+        }
+
+        button[type="submit"].bg-primary:hover,
+        button[type="submit"].hover\:bg-primary-dark:hover {
+            background-color: #00595b !important;
+        }
+
+        button[type="submit"] {
+            background-color: #007a7e !important;
+            color: #ffffff !important;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #00595b !important;
+        }
+
+        #navbar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #userway-widget-container {
+            position: relative;
+            margin-left: 10px;
+        }
+
+        /* Ajustando posição do VLibras */
+        [vw] {
+            position: fixed !important;
+            top: auto !important;
+            right: auto !important;
+            bottom: 20px !important;
+            left: 20px !important;
+            z-index: 1300 !important; /* acima do UserWay (userway z-index ~1200) */
+            display: block !important;
+            transform: scale(0.85) !important;
+            transform-origin: bottom left !important;
+        }
+        [vw-access-button] {
+            position: relative !important;
+            cursor: move !important;
+            z-index: 1301 !important;
+        }
+        [vw-plugin-wrapper] {
+            position: fixed !important;
+            cursor: move !important;
+            z-index: 1300 !important; /* garantir visibilidade acima de widgets concorrentes */
+            transform-origin: bottom center !important;
+        }
+        .vw-plugin-wrapper-draggable {
+            cursor: move !important;
+        }
+        @media (max-width: 768px) {
+            [vw] {
+                left: 20px !important;
+                right: auto !important;
+                transform-origin: bottom left !important;
+            }
+        }
+        /* Reserva espaço no header para o widget do UserWay, evitando sobreposição
+           com os controles (ex.: botão Sair). Mantém o widget onde está, apenas
+           desloca visualmente os controles para a esquerda suficiente. */
+        header#navbar {
+            position: relative; /* necessário para z-index funcionar se preciso */
+            padding-right: 96px; /* espaço para widget (48px) + margem e folga */
+        }
+
+        /* Garante que os controles do navbar fiquem acima (clicáveis) caso
+           alguma regra !important do widget tente sobrepor; position needed */
+        #navbar-controls {
+            position: relative;
+            z-index: 1005; /* maior que 1000 definido pelo widget */
+        }
+
+        @media (max-width: 768px) {
+            header#navbar {
+                padding-right: 64px; /* menos folga em telas pequenas */
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-bg-light dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen font-sans transition-colors duration-300">
+
+    <!-- Ícones Lucide (inline SVG para compatibilidade de arquivo único) -->
+    <script>
+        const icons = {
+            User: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            LogOut: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>`,
+            Mail: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.83 1.83 0 0 1-2.06 0L2 7"/></svg>`,
+            Sun: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+            Moon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`,
+            Send: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>`,
+            LayoutDashboard: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>`,
+            ListChecks: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 2-2 4 4"/><path d="M19 13l-2 2-4 4"/><path d="M19 7l-2 2-4 4"/><line x1="9.5" x2="18.5" y1="13.5" y2="13.5"/><line x1="13.5" x2="21.5" y1="19.5" y2="19.5"/><line x1="3.5" x2="12.5" y1="7.5" y2="7.5"/></svg>`,
+            Users: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            History: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-4.01 1.15"/><path d="M3.6 5.8a10 10 0 0 1 .4-2.2"/><path d="M12 7v5l4 2"/></svg>`,
+            Key: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 9-6-6"/><path d="m10.5 10.5-6.5 6.5A5.5 5.5 0 1 0 15.4 3.6l6.5-6.5a2.5 2.5 0 0 1 3.5 3.5Z"/><path d="M6.8 15.2 2 20l5.5-5.5"/><path d="m14 10 3 3"/></svg>`,
+        };
+    </script>
+
+    <div id="app" class="flex flex-col h-screen overflow-hidden">
+        <!-- HEADER / NAVBAR -->
+        <header id="navbar" class="hidden bg-white dark:bg-card-dark shadow-md p-4 flex justify-between items-center transition-colors duration-300 z-10">
+            <div class="logo-container" style="flex: 0 0 auto; margin-right: auto;">
+                <img src="../IMAGE/logo sem fundo.png" alt="Logo do Sistema" class="logo" style="width: 80px; height: auto;">
+            </div>
+
+            <div id="navbar-controls" class="flex items-center space-x-4" style="flex: 0 0 auto;">
+                <span id="user-info" class="text-sm font-medium"></span>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <span id="dark-mode-icon" class="w-6 h-6"></span>
+                </button>
+                <button onclick="logout()" class="flex items-center space-x-1 p-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-all">
+                    <span class="w-5 h-5" x-html="icons.LogOut"></span>
+                    <span class="text-sm hidden sm:inline">Sair</span>
+                </button>
+                <div id="userway-widget-container" class="flex items-center">
+                    <!-- UserWay widget já está posicionado aqui -->
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <div id="main-container" class="flex-grow flex overflow-hidden">
+
+            <!-- SIDEBAR NAVIGATION -->
+            <nav id="sidebar" class="hidden w-64 bg-white dark:bg-card-dark p-4 shadow-xl transition-colors duration-300 flex-shrink-0">
+                <ul class="space-y-2">
+                    <li class="nav-item"><a href="#dashboard" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="dashboard"><span class="w-6 h-6" x-html="icons.LayoutDashboard"></span><span>Dashboard</span></a></li>
+                    <li class="nav-item"><a href="#send-feedback" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="send-feedback"><span class="w-6 h-6" x-html="icons.Send"></span><span>Enviar Feedback</span></a></li>
+                    <li class="nav-item"><a href="#mural" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="mural"><span class="w-6 h-6" x-html="icons.ListChecks"></span><span>Mural Público</span></a></li>
+                    <li class="nav-item"><a href="#my-feedbacks" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="my-feedbacks"><span class="w-6 h-6" x-html="icons.History"></span><span>Meus Feedbacks</span></a></li>
+                    <li class="nav-item admin-only hidden"><a href="#users" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="users"><span class="w-6 h-6" x-html="icons.Users"></span><span>Usuários</span></a></li>
+<li class="nav-item admin-only hidden">
+    <a href="#cadastro" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="cadastro">
+        <span class="w-6 h-6" x-html="icons.Users"></span>
+        <span>Cadastrar Usuário</span>
+    </a>
+</li>
+                    <li class="nav-item"><a href="#change-password" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-primary/10 dark:hover:bg-primary-dark/20 transition-all" data-page="change-password"><span class="w-6 h-6" x-html="icons.Key"></span><span>Trocar Senha</span></a></li>
+                </ul>
+            </nav>
+
+            <!-- PAGE CONTENT CONTAINER -->
+            <main id="page-content" class="flex-grow p-6 overflow-y-auto" style="background-image: url('../IMAGE/fundoTelaInicial.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"></main>
+        </div>
+
+        <!-- LOGIN MODAL (Overlay) -->
+        <div id="auth-page" class="absolute inset-0 bg-gray-900/90 flex items-center justify-center z-50">
+            <div id="login-card" class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md transition-colors duration-300">
+                <h2 class="title-font text-3xl font-bold mb-6 text-center text-primary dark:text-primary-dark">Login</h2>
+                <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email (admin@sistema.com ou aluno@sistema.com)</label>
+                        <input type="email" id="email" name="email" value="admin@sistema.com" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha (admin123 ou senha123)</label>
+                        <input type="password" id="password" name="password" value="admin123" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white">
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors duration-300 shadow-lg">Entrar</button>
+                    <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Credenciais inválidas.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // --- Variáveis de Configuração e Estado ---
+        const BASE_URL = 'http://localhost:8080/api/feedbacks'; 
+        let isAuthenticated = false;
+        let currentUser = { email: null, role: null };
+        let authHeader = null;
+
+        const DESTINATARIOS = [
+            'PROFESSOR', 'SETOR_APOIO', 'OPP', 'COORDENADOR', 'LIMPEZA',
+            'CANTINA', 'MANUTENCAO', 'REFEITORIO', 'AUDITORIO', 'SALAS_DE_AULA'
+        ];
+        const STATUSES = ['EM_ABERTO', 'EM_ANDAMENTO', 'CONCLUIDO'];
+
+        function getAuthHeader(email, password) {
+            const credentials = btoa(`${email}:${password}`);
+            return `Basic ${credentials}`;
+        }
+
+        async function apiFetch(endpoint, options = {}) {
+            const defaultHeaders = {
+                'Content-Type': 'application/json',
+                'Authorization': authHeader,
+            };
+
+            const response = await fetch(endpoint, {
+                ...options,
+                headers: { ...defaultHeaders, ...options.headers },
+            });
+            if (response.status === 401 || response.status === 403) {
+                // Se for um token Bearer (possível expiração), efetua logout automático.
+                // Para logins de demonstração que usam Basic auth local, não forçamos logout
+                // para evitar desconectar o usuário sem contexto (permite visualização local).
+                try {
+                    if (authHeader && authHeader.startsWith('Bearer ')) {
+                        console.warn('Autenticação expirada/negada — efetuando logout.');
+                        logout();
+                        return null;
+                    } else {
+                        console.warn('Requisição não autorizada, mantendo sessão (demo/basic).');
+                        return response;
+                    }
+                } catch (e) {
+                    console.error('Erro ao processar resposta de autorização:', e);
+                    return response;
+                }
+            }
+            
+            return response;
+        }
+
+        function mockFetchFeedbacks(count) {
+            const feedbacks = [];
+            for (let i = 1; i <= count; i++) {
+                const status = STATUSES[i % STATUSES.length];
+                const destinatario = DESTINATARIOS[i % DESTINATARIOS.length];
+                feedbacks.push({
+                    id: i,
+                    titulo: `Feedback ${i}: Problema na ${destinatario}`,
+                    conteudo: `Detalhe sobre o problema ${i}. O ${destinatario} precisa de atenção.`,
+                    dataCriacao: new Date(Date.now() - i * 86400000).toLocaleDateString('pt-BR'),
+                    status: status,
+                    destinatario: destinatario,
+                    autorEmail: `user${i}@sistema.com`
+                });
+            }
+            return feedbacks;
+        }
+
+        async function handleLogin() {
+            const emailInput = document.getElementById('email').value;
+            const passwordInput = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+            errorElement.classList.add('hidden');
+
+            const tempAuthHeader = getAuthHeader(emailInput, passwordInput);
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/auth/validate`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': tempAuthHeader,
+                    }
+                });
+
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    // resposta pode não ter corpo JSON
+                }
+
+                const isDemoAdmin = emailInput === 'admin@sistema.com' && passwordInput === 'admin123';
+                const isDemoUser = emailInput === 'aluno@sistema.com' && passwordInput === 'senha123';
+
+                if (isDemoAdmin || isDemoUser || (response && response.ok && data)) {
+                    isAuthenticated = true;
+
+                    if (data && data.token) {
+                        authHeader = `Bearer ${data.token}`;
+                        localStorage.setItem('userToken', data.token);
+                        localStorage.setItem('userRole', data.tipoUsuario || (isDemoAdmin ? 'ADMINISTRADOR' : 'ALUNO'));
+                        localStorage.setItem('userLogin', data.login || emailInput);
+                        currentUser.email = data.login || emailInput;
+                        currentUser.role = data.tipoUsuario || (isDemoAdmin ? 'ADMINISTRADOR' : 'ALUNO');
+                    } else {
+                        authHeader = tempAuthHeader;
+                        currentUser.email = emailInput;
+                        currentUser.role = isDemoAdmin ? 'ADMINISTRADOR' : (isDemoUser ? 'ALUNO' : 'PROFESSOR');
+                    }
+
+                    renderApp();
+                } else {
+                    errorElement.innerText = "Credenciais inválidas.";
+                    errorElement.classList.remove('hidden');
+                    console.error('Login Failed:', response && response.status, data);
+                }
+            } catch (error) {
+                errorElement.innerText = "Erro de conexão com o servidor.";
+                errorElement.classList.remove('hidden');
+                console.error('Connection Error:', error);
+            }
+        }
+
+        function logout() {
+            isAuthenticated = false;
+            currentUser = { email: null, role: null };
+            authHeader = null;
+            window.location.hash = '#'; 
+            renderApp();
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                // Estava escuro, muda para claro
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                // Estava claro, muda para escuro
+                html.classList.remove('light');
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateDarkModeIcon();
+        }
+
+        function updateDarkModeIcon() {
+            const iconElement = document.getElementById('dark-mode-icon');
+            if (document.documentElement.classList.contains('dark')) {
+                iconElement.innerHTML = icons.Sun;
+            } else {
+                iconElement.innerHTML = icons.Moon;
+            }
+        }
+        
+        function dashboardPage() {
+            const role = currentUser.role;
+            const feedbacks = mockFetchFeedbacks(5);
+            
+            let content = `
+                <div class="space-y-6">
+                    <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark">Bem-vindo(a), ${currentUser.email}!</h2>
+                    <p class="text-xl text-white dark:text-white">Seu papel no sistema: <span class="font-bold text-white dark:text-white">${role}</span></p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-primary">
+                            <h3 class="text-xl font-semibold mb-2">Total de Feedbacks</h3>
+                            <p class="text-4xl font-bold text-primary">125</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Registrados no sistema.</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+                            <h3 class="text-xl font-semibold mb-2">Em Aberto</h3>
+                            <p class="text-4xl font-bold text-yellow-500">23</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Aguardando análise.</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-green-500">
+                            <h3 class="text-xl font-semibold mb-2">Concluídos (Último Mês)</h3>
+                            <p class="text-4xl font-bold text-green-500">67</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Problemas resolvidos.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4 title-font">Feedbacks Recentes</h3>
+                        ${feedbacks.map(f => `
+                            <div class="flex items-center justify-between p-3 border-b dark:border-gray-700 last:border-b-0">
+                                <div>
+                                    <p class="font-medium">${f.titulo}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Para: ${f.destinatario} | Em: ${f.dataCriacao}</p>
+                                </div>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : (f.status === 'EM_ANDAMENTO' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')}">
+                                    ${f.status}
+                                </span>
+                            </div>
+                        `).join('')}
+                        <button onclick="window.location.hash='#my-feedbacks'" class="mt-4 text-primary hover:text-primary-dark font-medium text-sm">Ver todos os feedbacks</button>
+                    </div>
+                </div>
+            `;
+            return content;
+        }
+
+        function sendFeedbackPage() {
+            let options = DESTINATARIOS.map(d => `<option value="${d}">${d.replace('_', ' ')}</option>`).join('');
+            
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Enviar Novo Feedback</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-2xl">
+                    <form id="feedback-form" onsubmit="event.preventDefault(); submitFeedback(event);">
+                        <div class="mb-4">
+                            <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
+                            <input type="text" id="titulo" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary text-black">
+                        </div>
+                        <div class="mb-4">
+                            <label for="destinatario" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destinatário (Setor)</label>
+                            <select id="destinatario" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary text-black">
+                                ${options}
+                            </select>
+                        </div>
+                        <div class="mb-6">
+                            <label for="conteudo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Detalhes do Feedback</label>
+                            <textarea id="conteudo" rows="5" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary text-black"></textarea>
+                        </div>
+                        <div class="mb-6">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="publico" checked class="w-4 h-4 rounded border-gray-300 dark:border-gray-600">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Publicar no Mural (deixe marcado para público, desmarque para privado)</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors duration-300 shadow-lg flex items-center justify-center space-x-2">
+                            ${icons.Send} <span>Enviar Feedback</span>
+                        </button>
+                        <p id="feedback-message" class="mt-4 text-center hidden"></p>
+                    </form>
+                </div>
+            `;
+        }
+
+        async function submitFeedback(event) {
+            const form = event.target;
+            const titulo = form.titulo.value;
+            const destinatario = form.destinatario.value;
+            const conteudo = form.conteudo.value;
+            const publico = document.getElementById('publico').checked;
+            const messageElement = document.getElementById('feedback-message');
+            messageElement.classList.add('hidden');
+
+            const payload = {
+                titulo,
+                conteudo,
+                destinatario,
+                publico,
+                autor: currentUser.email
+            };
+
+            try {
+                const response = await apiFetch(`${BASE_URL}`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                if (response && response.ok) {
+                    messageElement.innerText = '✅ Feedback enviado com sucesso!';
+                    messageElement.classList.remove('hidden');
+                    messageElement.classList.remove('text-red-500');
+                    messageElement.classList.add('text-green-500');
+                    form.reset();
+                    // Recarrega o mural se estiver aberto
+                    if (window.location.hash === '#mural') {
+                        setTimeout(() => loadMuralFeedbacks(), 500);
+                    }
+                } else {
+                    messageElement.innerText = 'Erro ao enviar feedback.';
+                    messageElement.classList.remove('hidden');
+                    messageElement.classList.remove('text-green-500');
+                    messageElement.classList.add('text-red-500');
+                    console.error('Erro ao enviar feedback', response);
+                }
+            } catch (error) {
+                messageElement.innerText = 'Erro de conexão ao enviar feedback.';
+                messageElement.classList.remove('hidden');
+                messageElement.classList.remove('text-green-500');
+                messageElement.classList.add('text-red-500');
+                console.error('Connection error sending feedback:', error);
+            }
+        }
+
+        function cadastroPage() {
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Cadastro de Usuário</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-2xl">
+                    <form id="cadastro-form" class="space-y-4" onsubmit="event.preventDefault(); handleCadastro();">
+                        <div>
+                            <label class="block text-sm font-medium text-white">Tipo de Usuário</label>
+                            <select id="tipoUsuarioSelect" class="w-full px-3 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600 text-black">
+                                <option value="ALUNO">Aluno</option>
+                                <option value="PROFESSOR">Professor</option>
+                                <option value="LIMPEZA">Limpeza</option>
+                                <option value="MANUTENCAO">Manutenção</option>
+                                <option value="OPP">OPP</option>
+                                <option value="SETOR_DE_APOIO">Setor de Apoio</option>
+                                <option value="COORDENADOR">Coordenador</option>
+                                <option value="GESTOR">Gestor</option>
+                                <option value="ADMINISTRADOR">Administrador</option>
+                            </select>
+                        </div>
+                        <input id="login" type="text" placeholder="Login" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-black">
+                        <input id="nome" type="text" placeholder="Nome" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-black">
+                        <input id="sobrenome" type="text" placeholder="Sobrenome" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-black">
+                        <input id="cpf" type="text" placeholder="CPF (11 dígitos)" maxlength="11" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-black" />
+                        <input id="senha" type="password" placeholder="Senha (mín. 6 caracteres)" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-black mt-2">
+                        <input id="confirm-senha" type="password" placeholder="Confirmar Senha" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-black mt-2">
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-dark">
+                            Criar Conta
+                        </button>
+                        <p id="cadastro-error" class="text-red-500 hidden text-sm"></p>
+                        <p id="cadastro-success" class="text-green-500 hidden text-sm"></p>
+                    </form>
+                </div>
+            `;
+        }
+
+        function muralPage() {
+            let content = `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Mural Público de Feedbacks</h2>
+                <p class="text-lg text-white dark:text-white mb-6">Visualização pública de todos os feedbacks em aberto ou em andamento.</p>
+                <div id="mural-content" class="space-y-4">
+                    <p class="text-center text-gray-500">Carregando feedbacks...</p>
+                </div>
+            `;
+            
+            // Depois de renderizar, busca feedbacks do servidor
+            setTimeout(() => {
+                loadMuralFeedbacks();
+            }, 100);
+            
+            return content;
+        }
+
+        async function loadMuralFeedbacks() {
+            try {
+                const response = await apiFetch(`http://localhost:8080/api/feedbacks`, {
+                    method: 'GET'
+                });
+
+                // Protege caso o usuário tenha sido deslogado durante a requisição
+                const muralContent = document.getElementById('mural-content');
+                if (!muralContent) {
+                    console.warn('loadMuralFeedbacks: elemento #mural-content não encontrado — abortando atualização.');
+                    return;
+                }
+
+                if (response && response.ok) {
+                    const feedbacks = await response.json();
+                    const publicFeedbacks = Array.isArray(feedbacks)
+                        ? feedbacks.filter(f => f.publico === true && f.status !== 'CONCLUIDO')
+                        : [];
+
+                    if (publicFeedbacks.length === 0) {
+                        muralContent.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum feedback público disponível.</p>';
+                    } else {
+                        muralContent.innerHTML = publicFeedbacks.map(f => `
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 ${f.status === 'EM_ABERTO' ? 'border-red-500' : (f.status === 'EM_ANDAMENTO' ? 'border-yellow-500' : 'border-green-500')}">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-xl">${f.titulo}</h3>
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : (f.status === 'EM_ANDAMENTO' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')}">
+                                        ${(f.status || 'EM_ABERTO').replace('_', ' ')}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300">${f.conteudo}</p>
+                                <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Setor: ${(f.destinatario || 'N/A').replace('_', ' ')} | Enviado em: ${new Date(f.dataEnvio || Date.now()).toLocaleDateString('pt-BR')}</p>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    // Se o servidor retornou 401/403 ou outro erro, tentamos um fallback com dados mock
+                    console.warn('loadMuralFeedbacks: resposta não OK — tentando fallback com dados mock.', response);
+                    try {
+                        const fallback = mockFetchFeedbacks(6).filter(f => true); // todos os mock são tratados como públicos
+                        muralContent.innerHTML = fallback.map(f => `
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 ${f.status === 'EM_ABERTO' ? 'border-red-500' : (f.status === 'EM_ANDAMENTO' ? 'border-yellow-500' : 'border-green-500')}">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-xl">${f.titulo}</h3>
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : (f.status === 'EM_ANDAMENTO' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')}">
+                                        ${(f.status || 'EM_ABERTO').replace('_', ' ')}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-300">${f.conteudo}</p>
+                                <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Setor: ${(f.destinatario || 'N/A').replace('_', ' ')} | Enviado em: ${new Date().toLocaleDateString('pt-BR')}</p>
+                            </div>
+                        `).join('');
+                    } catch (e) {
+                        muralContent.innerHTML = '<p class="text-red-500">Erro ao carregar feedbacks.</p>';
+                        console.error('Erro ao buscar feedbacks e fallback falhou', e, response);
+                    }
+                }
+            } catch (error) {
+                const muralContent = document.getElementById('mural-content');
+                if (muralContent) {
+                    muralContent.innerHTML = '<p class="text-red-500">Erro de conexão ao carregar feedbacks.</p>';
+                } else {
+                    console.warn('loadMuralFeedbacks (catch): elemento #mural-content não encontrado.');
+                }
+                console.error('Connection error loading feedbacks:', error);
+            }
+        }
+
+        function myFeedbacksPage() {
+            let content = `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Meus Feedbacks Enviados</h2>
+                <p class="text-lg text-white dark:text-white mb-6">Acompanhe o status e a resolução dos feedbacks que você enviou.</p>
+                <div id="my-feedbacks-content" class="space-y-4">
+                    <p class="text-center text-gray-500">Carregando seus feedbacks...</p>
+                </div>
+            `;
+            
+            // Depois de renderizar, busca feedbacks do usuário
+            setTimeout(() => {
+                loadMyFeedbacks();
+            }, 100);
+            
+            return content;
+        }
+
+        async function loadMyFeedbacks() {
+            try {
+                const response = await apiFetch(`http://localhost:8080/api/feedbacks/meus-feedbacks`, {
+                    method: 'GET'
+                });
+
+                if (response && response.ok) {
+                    const feedbacks = await response.json();
+                    const myFeedbacks = Array.isArray(feedbacks) ? feedbacks : [];
+
+                    const content = document.getElementById('my-feedbacks-content');
+                    if (myFeedbacks.length === 0) {
+                        content.innerHTML = '<p class="text-center text-gray-500 py-8">Você ainda não enviou nenhum feedback.</p>';
+                    } else {
+                        content.innerHTML = myFeedbacks.map(f => `
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 ${f.status === 'EM_ABERTO' ? 'border-red-500' : (f.status === 'EM_ANDAMENTO' ? 'border-yellow-500' : 'border-green-500')}">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-xl">${f.titulo}</h3>
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : (f.status === 'EM_ANDAMENTO' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')}">
+                                        ${(f.status || 'EM_ABERTO').replace('_', ' ')}
+                                    </span>\n                                </div>\n                                <p class=\"text-gray-600 dark:text-gray-300\">${f.conteudo}</p>\n                                <p class=\"text-sm mt-2 text-gray-500 dark:text-gray-400\">\n                                    Destinatário: ${(f.destinatario || 'N/A').replace('_', ' ')} | \n                                    Visibilidade: ${f.publico ? '🌐 Público' : '🔒 Privado'} | \n                                    Enviado em: ${new Date(f.dataEnvio || Date.now()).toLocaleDateString('pt-BR')}\n                                </p>\n                            </div>\n                        `).join('');
+                    }
+                } else {
+                    const content = document.getElementById('my-feedbacks-content');
+                    content.innerHTML = '<p class="text-red-500">Erro ao carregar seus feedbacks.</p>';
+                    console.error('Erro ao buscar meus feedbacks', response);
+                }
+            } catch (error) {
+                const content = document.getElementById('my-feedbacks-content');
+                content.innerHTML = '<p class="text-red-500">Erro de conexão ao carregar feedbacks.</p>';
+                console.error('Connection error loading my feedbacks:', error);
+            }
+        }
+
+        function usersPage() {
+            if (currentUser.role !== 'ADMINISTRADOR') {
+                return `<div class="p-6 bg-red-100 dark:bg-red-900 rounded-xl text-red-700 dark:text-red-300">Acesso negado. Apenas Administradores podem visualizar esta página.</div>`;
+            }
+
+            const users = [
+                { id: 1, login: 'admin@sistema.com', nome: 'Admin', role: 'ADMINISTRADOR', setor: 'GESTOR' },
+                { id: 2, login: 'aluno@sistema.com', nome: 'Aluno', role: 'ALUNO', setor: 'SALA_DE_AULA' },
+                { id: 3, login: 'prof.joao', nome: 'João', role: 'PROFESSOR', setor: 'PROFESSOR' },
+                { id: 4, login: 'limp.maria', nome: 'Maria', role: 'LIMPEZA', setor: 'LIMPEZA' },
+            ];
+            
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Gestão de Usuários</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Login</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Papel</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Setor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            ${users.map(u => `
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${u.login}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">${u.nome}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary/10 text-primary">${u.role}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">${u.setor.replace('_', ' ')}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button onclick="alert('Funcionalidade de edição para ${u.nome} não implementada.')" class="text-primary hover:text-primary-dark">Editar</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function changePasswordPage() {
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-primary dark:text-primary-dark mb-6">Trocar Senha</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-md">
+                    <form onsubmit="event.preventDefault(); alert('Funcionalidade de troca de senha não implementada na API.');">
+                        <div class="mb-4">
+                            <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha Atual</label>
+                            <input type="password" id="current-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                        </div>
+                        <div class="mb-4">
+                            <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nova Senha</label>
+                            <input type="password" id="new-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                        </div>
+                        <div class="mb-6">
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nova Senha</label>
+                            <input type="password" id="confirm-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors duration-300 shadow-lg">Salvar Nova Senha</button>
+                    </form>
+                </div>
+            `;
+        }
+        
+        function renderPage(pageName) {
+            const contentContainer = document.getElementById('page-content');
+            let content = '';
+            
+            document.querySelectorAll('.nav-item a').forEach(el => el.classList.remove('active'));
+
+            const activeLink = document.querySelector(`.nav-item a[data-page="${pageName}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            switch (pageName) {
+                case 'dashboard':
+                    content = dashboardPage();
+                    break;
+                case 'send-feedback':
+                    content = sendFeedbackPage();
+                    break;
+                case 'mural':
+                    content = muralPage();
+                    break;
+                case 'my-feedbacks':
+                    content = myFeedbacksPage();
+                    break;
+                case 'users':
+                    content = usersPage();
+                    break;
+                case 'cadastro': content = cadastroPage(); break;
+                case 'change-password':
+                    content = changePasswordPage();
+                    break;
+                default:
+                    content = dashboardPage();
+                    window.location.hash = '#dashboard';
+            }
+            contentContainer.innerHTML = content;
+        }
+
+        function renderApp() {
+            const authPage = document.getElementById('auth-page');
+            const navbar = document.getElementById('navbar');
+            const sidebar = document.getElementById('sidebar');
+
+            if (isAuthenticated) {
+                authPage.classList.add('hidden');
+                navbar.classList.remove('hidden');
+                sidebar.classList.remove('hidden');
+
+                document.getElementById('user-info').innerHTML = `${icons.User} <span class="ml-1">${currentUser.email} (${currentUser.role})</span>`;
+
+                const adminOnly = document.querySelectorAll('.admin-only');
+                if (currentUser.role === 'ADMINISTRADOR') {
+                    adminOnly.forEach(el => el.classList.remove('hidden'));
+                } else {
+                    adminOnly.forEach(el => el.classList.add('hidden'));
+                }
+
+                let targetPage = window.location.hash.substring(1) || 'dashboard';
+                renderPage(targetPage);
+
+            } else {
+                authPage.classList.remove('hidden');
+                navbar.classList.add('hidden');
+                sidebar.classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+            }
+            updateDarkModeIcon();
+        }
+
+        async function handleCadastro() {
+            const login = document.getElementById('login').value.trim();
+            const nome = document.getElementById('nome').value.trim();
+            const sobrenome = document.getElementById('sobrenome').value.trim();
+            const cpf = document.getElementById('cpf').value.trim();
+            const tipoUsuario = document.getElementById('tipoUsuarioSelect').value;
+            const error = document.getElementById('cadastro-error');
+            const ok = document.getElementById('cadastro-success');
+            error.classList.add('hidden');
+            ok.classList.add('hidden');
+            const senha = document.getElementById('senha').value;
+            const confirmSenha = document.getElementById('confirm-senha').value;
+
+            if (!login || !nome || !sobrenome || cpf.length !== 11 || !senha) {
+                error.textContent = "Preencha todos os campos corretamente e informe a senha.";
+                error.classList.remove('hidden');
+                return;
+            }
+
+            if (senha.length < 6) {
+                error.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+                error.classList.remove('hidden');
+                return;
+            }
+
+            if (senha !== confirmSenha) {
+                error.textContent = 'As senhas não conferem.';
+                error.classList.remove('hidden');
+                return;
+            }
+
+            const payload = {
+                login: login,
+                cpf: cpf.replace(/[^0-9]/g, ''),
+                nome: `${nome} ${sobrenome}`,
+                tipoUsuario: tipoUsuario,
+                senha: senha
+            };
+
+            try {
+                const resp = await fetch('http://localhost:8080/api/usuarios/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    ok.innerHTML = `✅ Usuário cadastrado com sucesso: ${data.nome}`;
+                    ok.classList.remove('hidden');
+                    document.getElementById('cadastro-form').reset();
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    error.textContent = err.error || 'Erro ao cadastrar usuário.';
+                    error.classList.remove('hidden');
+                    console.error('Cadastro falhou:', resp.status, resp.statusText, err);
+                }
+            } catch (e) {
+                error.textContent = 'Erro de conexão com o servidor.';
+                error.classList.remove('hidden');
+                console.error('Network error:', e);
+            }
+        }
+
+        window.addEventListener('hashchange', function() {
+            if (isAuthenticated) {
+                const targetPage = window.location.hash.substring(1) || 'dashboard';
+                renderPage(targetPage);
+            }
+        });
+
+        window.onload = function() {
+            // Carrega o tema salvo ou detecta preferência do sistema
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+            } else if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+            } else {
+                // Detecta preferência do sistema
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                }
+            }
+            
+            renderApp(); 
+            console.log("Sistema de Feedback Inicializado.");
+        }
+    </script>
+
+    <script>
+        (function() {
+            // Insere o container oficial do VLibras (garante estrutura mínima esperada pelo plugin)
+            if (!document.querySelector('[vw]')) {
+                const vwContainer = document.createElement('div');
+                vwContainer.setAttribute('vw', '');
+                vwContainer.className = 'vlibras-root';
+                vwContainer.innerHTML = '' +
+                    '<div vw-access-button class="vw-access-button" aria-hidden="true"></div>' +
+                    '<div vw-plugin-wrapper class="vw-plugin__wrapper" aria-hidden="true"><div class="vw-plugin-top-wrapper"></div></div>';
+                document.body.appendChild(vwContainer);
+            }
+
+            // Carrega o script oficial do VLibras e inicializa o widget ao carregar
+            const sVlibras = document.createElement('script');
+            sVlibras.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+            sVlibras.async = true;
+            sVlibras.onload = function() {
+                if (window.VLibras && typeof window.VLibras.Widget === 'function') {
+                    try {
+                        new window.VLibras.Widget('https://vlibras.gov.br/app');
+                        console.log('VLibras inicializado com sucesso.');
+                    } catch (e) {
+                        console.error('Erro ao inicializar VLibras:', e);
+                    }
+                } else {
+                    console.error('VLibras não disponível após carregar o script.');
+                }
+            };
+            sVlibras.onerror = function(e) {
+                console.error('Falha ao carregar o script VLibras:', e);
+            };
+            document.body.appendChild(sVlibras);
+
+            // Mantém a inicialização do UserWay conforme antes (apêndice separado)
+            const userwayScript = document.createElement('script');
+            userwayScript.src = 'https://cdn.userway.org/widget.js';
+            userwayScript.setAttribute('data-language', 'pt-br');
+            userwayScript.setAttribute('data-position', 'bottom-left');
+            userwayScript.setAttribute('data-background', '#005792');
+            userwayScript.setAttribute('data-size', '48px');
+            userwayScript.setAttribute('data-mobile', 'true');
+            userwayScript.setAttribute('data-hide-mobile', 'false');
+            userwayScript.setAttribute('data-close-esc', 'true');
+            userwayScript.setAttribute('data-close-outside', 'true');
+
+            userwayScript.onload = function() {
+                setTimeout(() => {
+                    const selectors = [
+                        '#userway-widget',
+                        '[data-userway-account]',
+                        '.userway-widget',
+                        'div[id*="userway"]',
+                        'iframe[src*="userway"]'
+                    ];
+                    let widgetEl = null;
+                    for (const sel of selectors) {
+                        widgetEl = document.querySelector(sel);
+                        if (widgetEl) break;
+                    }
+                    const target = document.getElementById('userway-widget-container');
+                    if (widgetEl && target) {
+                        target.appendChild(widgetEl);
+                        widgetEl.style.setProperty('position', 'relative', 'important');
+                        widgetEl.style.setProperty('top', 'auto', 'important');
+                        widgetEl.style.setProperty('right', 'auto', 'important');
+                        widgetEl.style.setProperty('left', 'auto', 'important');
+                        widgetEl.style.setProperty('bottom', 'auto', 'important');
+                        widgetEl.style.setProperty('transform', 'none', 'important');
+                        widgetEl.style.setProperty('width', '48px', 'important');
+                        widgetEl.style.setProperty('height', '48px', 'important');
+                        widgetEl.style.setProperty('margin-right', '8px', 'important');
+                        widgetEl.style.setProperty('z-index', '1200', 'important');
+
+                        const inner = widgetEl.querySelector('*');
+                        if (inner) {
+                            inner.style.setProperty('position', 'relative', 'important');
+                            inner.style.setProperty('transform', 'none', 'important');
+                        }
+                    }
+                }, 600);
+            };
+
+            document.body.appendChild(userwayScript);
+        })();
+    </script>
+
+    <style>
+        /* Ajustando posição do VLibras */
+        [vw] {
+            position: fixed !important;
+            bottom: 20px !important;
+            left: 20px !important;
+            z-index: 1300 !important;
+            display: block !important;
+            transform: scale(0.85) !important;
+            transform-origin: bottom left !important;
+        }
+        [vw-access-button] {
+            position: relative !important;
+            cursor: move !important;
+            z-index: 1301 !important;
+        }
+        [vw-plugin-wrapper] {
+            position: fixed !important;
+            cursor: move !important;
+            z-index: 1300 !important;
+            transform-origin: bottom center !important;
+        }
+        .vw-plugin-wrapper-draggable {
+            cursor: move !important;
+        }
+        @media (max-width: 768px) {
+            [vw] {
+                left: 20px !important;
+                right: auto !important;
+                transform-origin: bottom left !important;
+            }
+        }
+    </style>
+
+</body>
+</html>

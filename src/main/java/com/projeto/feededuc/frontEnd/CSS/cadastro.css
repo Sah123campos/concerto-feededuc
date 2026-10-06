@@ -1,0 +1,287 @@
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background-image: url(/IMAGE/fundoLogin.png);
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden;
+}
+
+.container {
+    background: #363538;
+    border-radius: 10px;
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #1ca8ac;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 50px;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 5px; 
+}
+
+.tabs button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.tabs button.active {
+    background: #c574db;
+    color: white;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #c574db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+    color: white;
+}
+
+.login-link a {
+    color: #1ca8ac;
+    text-decoration: none;
+}
+
+/* Estilos para posicionamento dos widgets de acessibilidade */
+/* VLibras Widget - Apenas posicionamento, sem dimensões fixas */
+[vw], .vw-widget {
+    position: fixed !important;
+    z-index: 1000 !important;
+    transform: none !important;
+}
+
+/* Permitir que a interface interna do VLibras funcione */
+.vw-plugin__wrapper {
+    position: relative !important;
+    z-index: 1001 !important;
+}
+
+/* UserWay Widget - Seletores mais específicos */
+#userway-widget, 
+[data-userway-account],
+.userway-widget,
+div[data-userway-account],
+div.userway-widget,
+iframe[src*="userway"],
+div[id*="userway"] {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Forçar posicionamento específico para VLibras - sem dimensões fixas */
+div[vw] {
+    position: fixed !important;
+    z-index: 1000 !important;
+    transform: none !important;
+}
+
+/* Forçar posicionamento específico para UserWay */
+div[data-userway-account],
+div.userway-widget,
+iframe[src*="userway"],
+div[id*="userway"] {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+/* Imagens responsivas */
+img { 
+    max-width: 100%; 
+    height: auto; 
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    .container {
+        padding: 25px 20px;
+        max-width: 100%;
+    }
+
+    h1 {
+        font-size: 40px;
+        margin-bottom: 20px;
+    }
+
+    .tabs {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tabs button {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    input {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    button[type="submit"] {
+        padding: 14px;
+        font-size: 16px;
+    }
+
+    .login-link {
+        font-size: 14px;
+    }
+
+    [vw] {
+        right: 70px !important;
+        top: 10px !important;
+        transform: scale(0.75) !important;
+    }
+    
+    #userway-widget, 
+    [data-userway-account],
+    .userway-widget,
+    div[data-userway-account],
+    div.userway-widget,
+    iframe[src*="userway"],
+    div[id*="userway"] {
+        top: 10px !important;
+        right: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 20px 15px;
+    }
+
+    h1 {
+        font-size: 35px;
+    }
+
+    .tabs button {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    input {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    button[type="submit"] {
+        padding: 12px;
+        font-size: 15px;
+    }
+}
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    .container {
+        padding: 25px 20px;
+        max-width: 100%;
+    }
+
+    h1 {
+        font-size: 40px;
+        margin-bottom: 20px;
+    }
+
+    .tabs {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tabs button {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    input {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    button[type="submit"] {
+        padding: 14px;
+        font-size: 16px;
+    }
+
+    .login-link {
+        font-size: 14px;
+    }
+
+    [vw] {
+        right: 70px !important;
+        top: 10px !important;
+        transform: scale(0.75) !important;
+    }
+    
+    #userway-widget, 
+    [data-userway-account],
+    .userway-widget,
+    div[data-userway-account],
+    div.userway-widget,
+    iframe[src*="userway"],
+    div[id*="userway"] {
+        top: 10px !important;
+        right: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
+}

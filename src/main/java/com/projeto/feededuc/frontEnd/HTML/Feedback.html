@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedEduc - Enviar Feedback</title>
+    <link rel="stylesheet" href="../CSS/Feedback.css">
+    <link rel="icon" type="image/x-icon" href="../IMAGE/logo sem fundo.png">
+    <style>
+        /* Estilos anteriores mantidos */
+        [vw] {
+            position: fixed !important;
+            top: 20px !important;
+            right: 90px !important;
+            z-index: 999 !important;
+            transform: scale(0.85) !important;
+            transform-origin: top right !important;
+        }
+
+        [vw-access-button] {
+            position: relative !important;
+            cursor: move !important;
+        }
+
+        [vw-plugin-wrapper] {
+            position: fixed !important;
+            cursor: move !important;
+            z-index: 9999 !important;
+            transform-origin: top center !important;
+        }
+
+        .vw-plugin-wrapper-draggable {
+            cursor: move !important;
+        }
+
+        @media (max-width: 768px) {
+            [vw] {
+                right: 90px !important;
+                left: auto !important;
+                transform-origin: top right !important;
+            }
+        }
+        
+        [data-userway-account],
+        .userway-widget,
+        #userway-widget,
+        iframe[src*="userway"],
+        div[id*="userway"],
+        div[class*="userway"] {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 1000 !important;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background-color: #c574db;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .dropdown-menu a,
+        .dropdown-menu button {
+            padding: 12px 20px;
+            text-align: left;
+            text-decoration: none;
+            color: #fff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .dropdown-menu a:hover,
+        .dropdown-menu button:hover {
+            background-color: #003f5c;
+        }
+
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                position: fixed;
+                top: 0;
+                right: 0;
+                left: auto;
+                bottom: 0;
+                width: 70vw;
+                max-width: 320px;
+                height: 100vh;
+                padding-top: 70px;
+                display: flex;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+            .dropdown-menu.open {
+                transform: translateX(0);
+            }
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+        }
+
+        /* Novos estilos para avaliação por estrelas */
+        .rating-container {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .rating-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .star {
+            font-size: 24px;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.2s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffc107;
+        }
+
+        .rating-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .success-message {
+            color: #2e7d32;
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container" style="position: relative;">
+            <img src="../IMAGE/logo sem fundo.png" alt="Logo do FeedEduc" class="logo" id="menu-toggle" aria-haspopup="true" aria-expanded="false">
+            <div id="dropdown-menu" class="dropdown-menu">
+                <a href="telaInicial.html">Início</a>
+                <a href="Feedback.html">Feedback</a>
+                <a href="mural.html">Mural</a>
+                <button id="dropdown-logout-btn" class="logout-btn">Logout</button>
+            </div>
+        </div>
+        <nav role="navigation" aria-label="Navegação principal">
+            <a href="telaInicial.html">Início</a>
+            <span aria-hidden="true">/</span>
+            <a href="Feedback.html" aria-current="page">Feedback</a>
+            <span aria-hidden="true">/</span>
+            <a href="mural.html">Mural</a>
+        </nav>
+    </header>
+    
+    <main class="feedback-main" role="main">
+        <div class="feedback-container">
+            <!-- Mensagens de status -->
+            <div id="error-message" class="error-message" role="alert"></div>
+            <div id="success-message" class="success-message" role="alert"></div>
+
+            <div class="feedback-categories">
+                <div class="main-option" data-target="category-options" role="button" tabindex="0" aria-expanded="false" aria-controls="category-options">Setor Alvo</div>
+                <div class="sub-options" id="category-options" role="listbox" aria-label="Setores disponíveis para feedback">
+                    <div class="sub-option" role="option" tabindex="0" data-value="Professor">Professor</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="Limpeza">Limpeza</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="Manutenção">Manutenção</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="Sala de Aula">Sala de Aula</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="Equipamentos">Equipamentos</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="Setor de Apoio">Setor de Apoio</div>
+                </div>
+            </div>
+
+            <div class="feedback-nome">
+                <input id="setor-alvo" type="text" placeholder="Especificar setor/pessoa (ex: Professor João, Sala 301)" autocomplete="off" aria-label="Setor ou pessoa específica do feedback">
+                <div class="input-icon" aria-hidden="true">👨‍🏫</div>
+            </div>
+
+            <div class="feedback-input">
+                <input id="titulo" type="text" placeholder="Título do feedback" aria-label="Título do feedback">
+                <textarea id="conteudo" placeholder="Descreva seu feedback em detalhes..." aria-label="Conteúdo do feedback" rows="5"></textarea>
+            </div>
+
+            <!-- Avaliação por estrelas -->
+            <div class="rating-container">
+                <label class="rating-label">Avaliação (opcional):</label>
+                <div class="star-rating" role="radiogroup" aria-label="Avaliação de 1 a 5 estrelas">
+                    <span class="star" data-value="1" role="radio" aria-checked="false" tabindex="0">★</span>
+                    <span class="star" data-value="2" role="radio" aria-checked="false" tabindex="0">★</span>
+                    <span class="star" data-value="3" role="radio" aria-checked="false" tabindex="0">★</span>
+                    <span class="star" data-value="4" role="radio" aria-checked="false" tabindex="0">★</span>
+                    <span class="star" data-value="5" role="radio" aria-checked="false" tabindex="0">★</span>
+                </div>
+                <div class="rating-text" id="rating-text">Clique nas estrelas para avaliar (1-5)</div>
+            </div>
+
+            <div class="feedback-options">
+                <div class="feedback-options-top">
+                    <div class="privacy-container">
+                        <div class="privacy-header">
+                            <p class="privacy-label">Visibilidade:</p>
+                            <div class="privacy-scroller" role="radiogroup" aria-label="Opções de visibilidade do feedback">
+                                <div class="privacy-option">
+                                    <input type="radio" id="privado" name="privacy" value="true" checked aria-describedby="privacy-description privado-desc">
+                                    <label for="privado">Privado</label>
+                                </div>
+                                <div class="privacy-option">
+                                    <input type="radio" id="publico" name="privacy" value="false" aria-describedby="privacy-description publico-desc">
+                                    <label for="publico">Público</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="privacy-description" class="sr-only">
+                            Escolha a visibilidade do seu feedback. Privado: visível apenas para o setor responsável e administração. Público: visível para todos os usuários.
+                        </div>
+                        <div class="privacy-descriptions">
+                            <div id="privado-desc" class="privacy-desc" aria-live="polite">
+                                <strong>Visível para:</strong> Apenas o setor responsável e administração.
+                                <br><strong>Ideal para:</strong> Feedback sensível ou pessoal.
+                            </div>
+                            <div id="publico-desc" class="privacy-desc" aria-live="polite" style="display: none;">
+                                <strong>Visível para:</strong> Todos os usuários da plataforma.
+                                <br><strong>Ideal para:</strong> Elogios e sugestões construtivas.
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" onclick="enviarFeedback()" type="button" aria-label="Enviar feedback">Enviar Feedback</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Variáveis globais
+        let setorSelecionado = '';
+        let notaSelecionada = 0;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarComponentes();
+            verificarAutenticacao();
+        });
+
+        function inicializarComponentes() {
+            // Dropdown de setores
+            const mainOptions = document.querySelectorAll('.main-option');
+            mainOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const target = document.getElementById(targetId);
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    
+                    // Fechar outros dropdowns
+                    document.querySelectorAll('.sub-options').forEach(sub => {
+                        if (sub.id !== targetId) {
+                            sub.style.display = 'none';
+                            const correspondingMain = document.querySelector(`[data-target="${sub.id}"]`);
+                            if (correspondingMain) {
+                                correspondingMain.setAttribute('aria-expanded', 'false');
+                            }
+                        }
+                    });
+                    
+                    // Alternar atual
+                    target.style.display = isExpanded ? 'none' : 'block';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                });
+            });
+
+            // Seleção de setor
+            document.querySelectorAll('.sub-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    setorSelecionado = value;
+                    
+                    // Atualizar UI
+                    const mainOption = this.closest('.sub-options').previousElementSibling;
+                    mainOption.textContent = value;
+                    mainOption.setAttribute('aria-expanded', 'false');
+                    this.closest('.sub-options').style.display = 'none';
+                    
+                    // Preencher campo de setor alvo
+                    document.getElementById('setor-alvo').value = value;
+                });
+            });
+
+            // Sistema de estrelas
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    notaSelecionada = value;
+                    atualizarEstrelas(value);
+                    atualizarTextoAvaliacao(value);
+                });
+
+                star.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const value = parseInt(this.getAttribute('data-value'));
+                        notaSelecionada = value;
+                        atualizarEstrelas(value);
+                        atualizarTextoAvaliacao(value);
+                    }
+                });
+            });
+
+            // Visibilidade
+            document.querySelectorAll('input[name="privacy"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const isPrivado = this.value === 'true';
+                    document.getElementById('privado-desc').style.display = isPrivado ? 'block' : 'none';
+                    document.getElementById('publico-desc').style.display = isPrivado ? 'none' : 'block';
+                });
+            });
+
+            // Fechar dropdowns ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.main-option') && !e.target.closest('.sub-options')) {
+                    document.querySelectorAll('.sub-options').forEach(sub => {
+                        sub.style.display = 'none';
+                    });
+                    document.querySelectorAll('.main-option').forEach(main => {
+                        main.setAttribute('aria-expanded', 'false');
+                    });
+                }
+            });
+        }
+
+        function atualizarEstrelas(valor) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                const starValue = parseInt(star.getAttribute('data-value'));
+                if (starValue <= valor) {
+                    star.classList.add('active');
+                    star.setAttribute('aria-checked', 'true');
+                } else {
+                    star.classList.remove('active');
+                    star.setAttribute('aria-checked', 'false');
+                }
+            });
+        }
+
+        function atualizarTextoAvaliacao(valor) {
+            const textos = [
+                "Péssimo",
+                "Ruim", 
+                "Regular",
+                "Bom",
+                "Excelente"
+            ];
+            document.getElementById('rating-text').textContent = textos[valor - 1] || "Clique nas estrelas para avaliar (1-5)";
+        }
+
+        function verificarAutenticacao() {
+            const token = localStorage.getItem('userToken');
+            const userRole = localStorage.getItem('userRole');
+            
+            if (!token) {
+                mostrarErro('Você precisa estar logado para enviar feedback.');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                return false;
+            }
+
+            // Apenas alunos podem enviar feedback
+            if (userRole !== 'ALUNO') {
+                mostrarErro('Apenas alunos podem enviar feedback.');
+                return false;
+            }
+
+            return true;
+        }
+
+        async function enviarFeedback() {
+            if (!verificarAutenticacao()) return;
+
+            // Coletar dados do formulário
+            const titulo = document.getElementById('titulo').value.trim();
+            const conteudo = document.getElementById('conteudo').value.trim();
+            const setorAlvo = document.getElementById('setor-alvo').value.trim() || setorSelecionado;
+            const privado = document.querySelector('input[name="privacy"]:checked').value === 'true';
+            const nota = notaSelecionada > 0 ? notaSelecionada : null;
+
+            // Validações
+            if (!titulo) {
+                mostrarErro('Por favor, insira um título para o feedback.');
+                return;
+            }
+
+            if (!conteudo) {
+                mostrarErro('Por favor, descreva seu feedback.');
+                return;
+            }
+
+            if (!setorAlvo) {
+                mostrarErro('Por favor, selecione ou especifique um setor alvo.');
+                return;
+            }
+
+            // Monta payload compatível com o modelo do backend (Feedback)
+            // Tenta mapear o setor para um TipoUsuario conhecido; caso contrário envia como destinatarioEspecifico
+            function mapSetorToTipo(setor) {
+                if (!setor) return null;
+                const s = setor.trim().toLowerCase();
+                const map = {
+                    'professor': 'PROFESSOR',
+                    'limpeza': 'LIMPEZA',
+                    'manutenção': 'MANUTENCAO',
+                    'manutencao': 'MANUTENCAO',
+                    'sala de aula': 'SALAS_DE_AULA',
+                    'sala': 'SALAS_DE_AULA',
+                    'setor de apoio': 'SETOR_APOIO',
+                    'setor apoio': 'SETOR_APOIO',
+                    'cantina': 'CANTINA',
+                    'refeitorio': 'REFEITORIO',
+                    'auditorio': 'AUDITORIO',
+                    'opp': 'OPP',
+                    'coordenador': 'COORDENADOR',
+                    'equipamentos': null
+                };
+                return map[s] || null;
+            }
+
+            const mapped = mapSetorToTipo(setorAlvo);
+
+            const feedbackData = {
+                titulo: titulo,
+                conteudo: conteudo,
+                destinatario: mapped,
+                destinatarioEspecifico: mapped ? null : setorAlvo,
+                publico: !privado,
+                nota: nota
+            };
+
+            console.log('📤 Enviando feedback:', feedbackData);
+
+            try {
+                const token = localStorage.getItem('userToken');
+                const response = await fetch('http://localhost:8080/api/feedbacks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(feedbackData)
+                });
+
+                console.log('📥 Resposta:', response.status);
+
+                if (response.ok) {
+                    const feedbackCriado = await response.json();
+                    mostrarSucesso('✅ Feedback enviado com sucesso!');
+                    limparFormulario();
+                    
+                    // Redirecionar após sucesso
+                    setTimeout(() => {
+                        window.location.href = 'telaInicial.html';
+                    }, 2000);
+                } else {
+                    const errorText = await response.text();
+                    mostrarErro(`Erro ao enviar feedback: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('💥 Erro:', error);
+                mostrarErro('Erro de conexão com o servidor.');
+            }
+        }
+
+        function limparFormulario() {
+            document.getElementById('titulo').value = '';
+            document.getElementById('conteudo').value = '';
+            document.getElementById('setor-alvo').value = '';
+            document.querySelector('input[name="privacy"][value="true"]').checked = true;
+            
+            // Resetar estrelas
+            notaSelecionada = 0;
+            atualizarEstrelas(0);
+            atualizarTextoAvaliacao(0);
+            
+            // Resetar dropdowns
+            setorSelecionado = '';
+            document.querySelectorAll('.main-option').forEach(opt => {
+                if (opt.getAttribute('data-target') === 'category-options') {
+                    opt.textContent = 'Setor Alvo';
+                }
+            });
+        }
+
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+            document.getElementById('success-message').style.display = 'none';
+            
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function mostrarSucesso(mensagem) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = mensagem;
+            successDiv.style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
+            
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Menu dropdown (código anterior mantido)
+        const menuToggle = document.getElementById('menu-toggle');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        const dropdownLogoutBtn = document.getElementById('dropdown-logout-btn');
+
+        menuToggle.addEventListener('click', () => {
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', !isExpanded);
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                dropdownMenu.classList.toggle('open', !isExpanded);
+            } else {
+                dropdownMenu.style.display = isExpanded ? 'none' : 'flex';
+            }
+        });
+
+        dropdownLogoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userLogin');
+            window.location.href = 'login.html';
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                if (window.matchMedia('(max-width: 768px)').matches) {
+                    dropdownMenu.classList.remove('open');
+                } else {
+                    dropdownMenu.style.display = 'none';
+                }
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+    
+    <!-- VLibras Widget -->
+    <div vw class="enabled" role="complementary" aria-label="Tradutor VLibras">
+        <div vw-access-button class="active" aria-label="Abrir tradutor VLibras"></div>
+        <div vw-plugin-wrapper>
+          <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+        // Código VLibras arrastável mantido...
+    </script>
+</body>
+</html>

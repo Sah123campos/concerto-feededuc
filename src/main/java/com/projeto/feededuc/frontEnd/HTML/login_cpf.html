@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedEduc - Login</title>
+    <link rel="stylesheet" href="../CSS/login.css">
+    <link rel="icon" type="image/x-icon" href="../IMAGE/logo sem fundo.png">
+</head>
+<body>
+    <main>
+        <div class="login-container">
+            <h1>Login</h1>
+            
+            <!-- 🔥 MUDANÇA: placeholder e label para "Login" em vez de "CPF" -->
+            <form id="login-form" aria-label="Formulário de login">
+                <input type="text" id="login" placeholder="Insira seu login" required aria-label="Login">
+                <input type="password" id="senha" placeholder="Insira a senha" required aria-label="Senha">
+                <button type="submit">Entrar</button>
+            </form>
+
+            <div id="login-error-message" style="color: red; display:none;"></div>
+
+            <!-- Primeiro acesso - trocar senha -->
+            <form id="change-password-form" style="display:none;" aria-label="Formulário de troca de senha">
+                <h2>Primeiro acesso - troque sua senha</h2>
+                <input type="password" id="senha-atual" placeholder="Senha temporária (mudar123)" required>
+                <input type="password" id="nova-senha" placeholder="Nova senha" required>
+                <button type="submit">Alterar senha</button>
+            </form>
+
+            <p class="register-link"><a href="./cadastro.html">Cadastrar novo usuário</a></p>
+        </div>
+    </main>
+
+    <!-- Adding VLibras and UserWay accessibility widgets -->
+    <div vw class="enabled" role="complementary" aria-label="Tradutor VLibras">
+        <div vw-access-button class="active" aria-label="Abrir tradutor VLibras"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+    </script>
+    <script>
+        (function(d){
+            var s = d.createElement("script");
+            s.setAttribute("data-language", "pt-br");
+            s.setAttribute("data-position", "top-right");
+            s.setAttribute("data-background", "#005792");
+            s.setAttribute("data-size", "48px");
+            s.setAttribute("data-mobile", "true");
+            s.setAttribute("data-hide-mobile", "false");
+            s.setAttribute("data-close-esc", "true");
+            s.setAttribute("data-close-outside", "true");
+            s.src = "https://cdn.userway.org/widget.js";
+            (d.body || d.head).appendChild(s);
+        })(document);
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔐 Página de login carregada');
+            
+            // 🔥 MUDANÇA: ID do formulário atualizado para "login-form"
+            const loginForm = document.getElementById('login-form');
+            const changeForm = document.getElementById('change-password-form');
+            const loginErrorMessage = document.getElementById('login-error-message');
+
+            // Verificar se os elementos existem
+            if (!loginForm) {
+                console.error('❌ Elemento login-form não encontrado!');
+                return;
+            }
+            
+            console.log('✅ Formulário de login encontrado');
+
+            let usuarioLogado = null;
+
+            // Configurar evento de login
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (loginErrorMessage) loginErrorMessage.style.display = 'none';
+
+                // 🔥 MUDANÇA: Usar campo "login" em vez de "cpf"
+                const login = document.getElementById('login').value.trim();
+                const senha = document.getElementById('senha').value;
+
+                // Validação básica
+                if (!login) {
+                    if (loginErrorMessage) {
+                        loginErrorMessage.textContent = 'Login é obrigatório.';
+                        loginErrorMessage.style.display = 'block';
+                    }
+                    return;
+                }
+
+                if (!senha) {
+                    if (loginErrorMessage) {
+                        loginErrorMessage.textContent = 'Senha é obrigatória.';
+                        loginErrorMessage.style.display = 'block';
+                    }
+                    return;
+                }
+
+                try {
+                    console.log('🔐 Tentando login...', { login, senha });
+
+                    const res = await fetch('http://localhost:8080/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            login: login,  // 🔥 ENVIA O LOGIN
+                            senha: senha 
+                        })
+                    });
+
+                    console.log('📥 Resposta do login:', res.status);
+
+                    if (!res.ok) {
+                        let errorMsg = 'Login ou senha incorretos.';
+                        try {
+                            const errorData = await res.json();
+                            errorMsg = errorData.message || errorMsg;
+                        } catch (e) {
+                            const text = await res.text();
+                            errorMsg = text || errorMsg;
+                        }
+                        if (loginErrorMessage) {
+                            loginErrorMessage.textContent = errorMsg;
+                            loginErrorMessage.style.display = 'block';
+                        }
+                        return;
+                    }
+
+                    const data = await res.json();
+                    console.log('✅ Login bem-sucedido:', data);
+
+                    if (data.primeiroAcesso) {
+                        usuarioLogado = {
+                            login: login,
+                            token: data.token
+                        };
+                        loginForm.style.display = 'none';
+                        if (changeForm) changeForm.style.display = 'block';
+                        return;
+                    }
+
+                    await fazerLoginCompleto(data.token, login);
+
+                } catch (err) {
+                    console.error('💥 Erro no login:', err);
+                    if (loginErrorMessage) {
+                        loginErrorMessage.textContent = 'Erro de conexão com o servidor. Verifique se o Spring Boot está rodando.';
+                        loginErrorMessage.style.display = 'block';
+                    }
+                }
+            });
+            async function fazerLoginCompleto(token, login) {
+    try {
+        let userRole = 'ALUNO';
+        let userId = null;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userRole = payload.role || 'ALUNO';
+            userId = payload.sub || null;
+            console.log('👤 Informações do token:', payload);
+        } catch (e) {
+            console.log('⚠️ Não foi possível decodificar o token JWT');
+        }
+
+        // 🔥 SALVAR NO sessionStorage
+        sessionStorage.setItem('userToken', token);
+        sessionStorage.setItem('userRole', userRole);
+        sessionStorage.setItem('userId', userId || '');
+        sessionStorage.setItem('userLogin', login);
+
+        // 🔥 VERIFICAR SE SALVOU CORRETAMENTE
+        console.log('💾 Dados salvos no sessionStorage:');
+        console.log('- userToken:', sessionStorage.getItem('userToken') ? '✅' : '❌');
+        console.log('- userRole:', sessionStorage.getItem('userRole'));
+        console.log('- userLogin:', sessionStorage.getItem('userLogin'));
+
+        console.log('🔑 Login completo - Role:', userRole);
+
+        if (userRole === 'ADMIN') {
+            window.location.href = 'mural.html';
+        } else {
+            window.location.href = 'telaInicial.html';
+        }
+
+    } catch (err) {
+        console.error('💥 Erro ao fazer login completo:', err);
+        sessionStorage.setItem('userToken', token);
+        sessionStorage.setItem('userLogin', login);
+        window.location.href = 'telaInicial.html';
+    }
+}
+
+            // Configurar evento de troca de senha
+            if (changeForm) {
+                changeForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (loginErrorMessage) loginErrorMessage.style.display = 'none';
+
+                    const senhaAtual = document.getElementById('senha-atual').value;
+                    const novaSenha = document.getElementById('nova-senha').value;
+
+                    if (novaSenha.length < 6) {
+                        if (loginErrorMessage) {
+                            loginErrorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                            loginErrorMessage.style.display = 'block';
+                        }
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch('http://localhost:8080/api/usuarios/trocar-senha', {
+                            method: 'PUT',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${usuarioLogado.token}`
+                            },
+                            body: JSON.stringify({ 
+                                senhaAtual: senhaAtual,
+                                novaSenha: novaSenha
+                            })
+                        });
+
+                        console.log('📥 Resposta da troca de senha:', res.status);
+
+                        if (!res.ok) {
+                            let errorMsg = 'Erro ao alterar senha.';
+                            try {
+                                const errorData = await res.json();
+                                errorMsg = errorData.error || errorData.message || errorMsg;
+                            } catch (e) {
+                                const text = await res.text();
+                                errorMsg = text || errorMsg;
+                            }
+                            if (loginErrorMessage) {
+                                loginErrorMessage.textContent = errorMsg;
+                                loginErrorMessage.style.display = 'block';
+                            }
+                            return;
+                        }
+
+                        alert('✅ Senha alterada com sucesso! Faça login novamente.');
+                        if (changeForm) changeForm.style.display = 'none';
+                        loginForm.style.display = 'block';
+                        document.getElementById('senha-atual').value = '';
+                        document.getElementById('nova-senha').value = '';
+                        document.getElementById('senha').value = '';
+
+                    } catch (err) {
+                        console.error('💥 Erro na troca de senha:', err);
+                        if (loginErrorMessage) {
+                            loginErrorMessage.textContent = 'Erro de conexão com o servidor.';
+                            loginErrorMessage.style.display = 'block';
+                        }
+                    }
+                });
+            }
+
+            // Função de login completo
+            async function fazerLoginCompleto(token, login) {
+                try {
+                    let userRole = 'ALUNO';
+                    let userId = null;
+
+                    try {
+                        const payload = JSON.parse(atob(token.split('.')[1]));
+                        userRole = payload.role || 'ALUNO';
+                        userId = payload.sub || null;
+                        console.log('👤 Informações do token:', payload);
+                    } catch (e) {
+                        console.log('⚠️ Não foi possível decodificar o token JWT');
+                    }
+
+                    sessionStorage.setItem('userToken', token);
+                    sessionStorage.setItem('userRole', userRole);
+                    sessionStorage.setItem('userId', userId || '');
+                    sessionStorage.setItem('userLogin', login);
+
+                    console.log('🔑 Login completo - Role:', userRole);
+                    console.log('💾 Token salvo no sessionStorage');
+
+                    if (userRole === 'ADMIN') {
+                        window.location.href = 'mural.html';
+                    } else {
+                        window.location.href = 'telaInicial.html';
+                    }
+
+                } catch (err) {
+                    console.error('💥 Erro ao fazer login completo:', err);
+                    sessionStorage.setItem('userToken', token);
+                    sessionStorage.setItem('userLogin', login);
+                    window.location.href = 'telaInicial.html';
+                }
+            }
+
+            // 🔥 REMOVIDO: máscara de CPF (não é mais necessário)
+
+            // Força a inicialização do VLibras
+            const vlibrasScript = document.createElement('script');
+            vlibrasScript.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
+            vlibrasScript.onload = function() {
+                new window.VLibras.Widget('https://vlibras.gov.br/app');
+            };
+            document.body.appendChild(vlibrasScript);
+
+            // Força a inicialização do UserWay
+            const userwayScript = document.createElement('script');
+            userwayScript.src = 'https://cdn.userway.org/widget.js';
+            userwayScript.setAttribute('data-language', 'pt-br');
+            userwayScript.setAttribute('data-position', 'top-right');
+            userwayScript.setAttribute('data-background', '#005792');
+            userwayScript.setAttribute('data-size', '48px');
+            userwayScript.setAttribute('data-mobile', 'true');
+            userwayScript.setAttribute('data-hide-mobile', 'false');
+            userwayScript.setAttribute('data-close-esc', 'true');
+            userwayScript.setAttribute('data-close-outside', 'true');
+            document.body.appendChild(userwayScript);
+        });
+    </script>
+</body>
+</html>

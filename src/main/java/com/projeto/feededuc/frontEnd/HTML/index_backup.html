@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+    <title>Sistema de Feedback - FeedEduc</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- VLibras -->
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    
+    <style>
+
+ 
+.animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+    
+
+
+
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        .nav-item a.active {
+            background: #c574db !important;
+            color: white !important;
+        }
+    .feedback-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 10px;
+    padding: 16px;
+    min-width: 240px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: auto;
+    min-height: 130px;
+    overflow: visible;
+}
+        /* 🔥 CORREÇÃO: Hover dos cards */
+.feedback-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+       .feedback-card-privado {
+    background: #4a3457 !important;
+    border-left: 5px solid #4a3457;
+}
+
+/* ✅ CORREÇÃO: Para feedbacks privados */
+.feedback-card-privado .feedback-message div {
+    background: #5a3f6a !important;
+    border: 1px solid #6b4c7e !important;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+        .feedback-card-privado .feedback-title,
+        .feedback-card-privado .feedback-message {
+            color: #ffffff;
+        }
+
+        /* 🔥 CORREÇÃO: Conteúdo da mensagem */
+.feedback-message {
+    margin-top: 8px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ✅ CORREÇÃO: Conteúdo da mensagem */
+.feedback-message .bg-gray-50 {
+    background: transparent !important; /* 🔥 REMOVER fundo branco */
+    border: none !important;
+    padding: 0 !important;
+}
+
+.feedback-message .dark\:bg-gray-700 {
+    background: transparent !important; /* 🔥 REMOVER fundo no dark mode */
+    border: none !important;
+}
+
+
+/* ✅ CORREÇÃO: Para feedbacks públicos */
+.feedback-card:not(.feedback-card-privado) .feedback-message div {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.dark .feedback-card:not(.feedback-card-privado) .feedback-message div {
+    background: #374151;
+    border: 1px solid #4b5563;
+}
+
+/* 🔥 CORREÇÃO: Ações do feedback */
+.feedback-actions {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid;
+}
+
+        /* 🔥 CORREÇÃO: Status badges */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: bold;
+    white-space: nowrap;
+}
+        .status-em_aberto { background: #fff3cd; color: #856404; }
+.status-em_analise { background: #d1ecf1; color: #0c5460; }
+.status-resolvido { background: #d4edda; color: #155724; }
+        .star-filled { color: #ffc107; }
+        .star-empty { color: #ddd; }
+
+        /* 🔥 CORREÇÃO: Container de resposta */
+.feedback-response {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen font-sans transition-colors duration-300">
+
+    <!-- Ícones SVG -->
+    <script>
+        const icons = {
+            User: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            LogOut: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>`,
+            Mail: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.83 1.83 0 0 1-2.06 0L2 7"/></svg>`,
+            Sun: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+            Moon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`,
+            Send: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>`,
+            LayoutDashboard: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>`,
+            ListChecks: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 2-2 4 4"/><path d="M19 13l-2 2-4 4"/><path d="M19 7l-2 2-4 4"/><line x1="9.5" x2="18.5" y1="13.5" y2="13.5"/><line x1="13.5" x2="21.5" y1="19.5" y2="19.5"/><line x1="3.5" x2="12.5" y1="7.5" y2="7.5"/></svg>`,
+            Users: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            History: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-4.01 1.15"/><path d="M3.6 5.8a10 10 0 0 1 .4-2.2"/><path d="M12 7v5l4 2"/></svg>`,
+            Key: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 9-6-6"/><path d="m10.5 10.5-6.5 6.5A5.5 5.5 0 1 0 15.4 3.6l6.5-6.5a2.5 2.5 0 0 1 3.5 3.5Z"/><path d="M6.8 15.2 2 20l5.5-5.5"/><path d="m14 10 3 3"/></svg>`,
+        };
+    </script>
+
+    <div id="app" class="flex flex-col h-screen overflow-hidden">
+        <!-- HEADER / NAVBAR -->
+        <header id="navbar" class="hidden bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center transition-colors duration-300 z-10">
+            <h1 class="text-2xl font-serif title-font font-bold text-primary dark:text-primary-dark">FeedEduc</h1>
+            <div class="flex items-center space-x-4">
+                <span id="user-info" class="text-sm font-medium"></span>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                    <span id="dark-mode-icon" class="w-6 h-6"></span>
+                </button>
+                <button onclick="logout()" class="flex items-center space-x-1 p-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-all">
+                    <span class="w-5 h-5" x-html="icons.LogOut"></span>
+                    <span class="text-sm hidden sm:inline">Sair</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <div id="main-container" class="flex-grow flex overflow-hidden">
+
+            <!-- SIDEBAR NAVIGATION -->
+            <nav id="sidebar" class="hidden w-64 bg-white dark:bg-gray-800 p-4 shadow-xl transition-colors duration-300 flex-shrink-0">
+                <ul class="space-y-2">
+                    <li class="nav-item"><a href="#dashboard" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-all" data-page="dashboard"><span class="w-6 h-6" x-html="icons.LayoutDashboard"></span><span>Dashboard</span></a></li>
+                    <li class="nav-item"><a href="#send-feedback" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-all" data-page="send-feedback"><span class="w-6 h-6" x-html="icons.Send"></span><span>Enviar Feedback</span></a></li>
+                    <li class="nav-item"><a href="#mural" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-all" data-page="mural"><span class="w-6 h-6" x-html="icons.ListChecks"></span><span>Mural Público</span></a></li>
+                    <li class="nav-item"><a href="#my-feedbacks" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-all" data-page="my-feedbacks"><span class="w-6 h-6" x-html="icons.History"></span><span>Meus Feedbacks</span></a></li>
+                    <li class="nav-item admin-only hidden"><a href="#users" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-all" data-page="users"><span class="w-6 h-6" x-html="icons.Users"></span><span>Usuários</span></a></li>
+                    <li class="nav-item admin-only hidden"><a href="#cadastro" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-all" data-page="cadastro"><span class="w-6 h-6" x-html="icons.Users"></span><span>Cadastrar Usuário</span></a></li>
+                    <li class="nav-item"><a href="#change-password" class="flex items-center space-x-3 p-3 rounded-xl text-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition-all" data-page="change-password"><span class="w-6 h-6" x-html="icons.Key"></span><span>Trocar Senha</span></a></li>
+                </ul>
+            </nav>
+
+            <!-- PAGE CONTENT CONTAINER -->
+            <main id="page-content" class="flex-grow p-6 overflow-y-auto"></main>
+        </div>
+
+        <!-- LOGIN MODAL -->
+        <div id="auth-page" class="absolute inset-0 bg-gray-900/90 flex items-center justify-center z-50">
+            <div id="login-card" class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md transition-colors duration-300">
+                <h2 class="title-font text-3xl font-bold mb-6 text-center text-blue-600 dark:text-blue-400">Login FeedEduc</h2>
+                <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="mb-4">
+                        <label for="login" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Login (CPF/Matrícula)</label>
+                        <input type="text" id="login" name="login" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="admin">
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                        <input type="password" id="password" name="password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="admin123">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-300 shadow-lg">Entrar</button>
+                    <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Credenciais inválidas.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- VLibras Widget -->
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração VLibras
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+        // --- Configuração do Sistema ---
+        const BACKEND_URL = 'http://localhost:8080';
+        let currentUser = { login: null, role: null, token: null };
+        let todosFeedbacks = [];
+
+        // --- Funções de Autenticação ---
+        async function handleLogin() {
+            const login = document.getElementById('login').value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+            errorElement.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        login: login,
+                        senha: password
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Salvar dados do usuário
+                    currentUser = {
+                        login: data.login,
+                        role: data.tipoUsuario,
+                        token: data.token,
+                        nome: data.nome,
+                        primeiroAcesso: data.primeiroAcesso
+                    };
+
+                    // Salvar no localStorage para persistência
+                    localStorage.setItem('userToken', data.token);
+                    localStorage.setItem('userRole', data.tipoUsuario);
+                    localStorage.setItem('userLogin', data.login);
+                    localStorage.setItem('userName', data.nome);
+
+                    renderApp();
+                    
+                    // Se for primeiro acesso, mostrar formulário de troca de senha
+                    if (data.primeiroAcesso) {
+                        alert('Primeiro acesso! Por favor, troque sua senha.');
+                        window.location.hash = '#change-password';
+                    }
+                } else {
+                    errorElement.textContent = 'Login ou senha incorretos.';
+                    errorElement.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorElement.textContent = 'Erro de conexão com o servidor.';
+                errorElement.classList.remove('hidden');
+                console.error('Erro no login:', error);
+            }
+        }
+
+
+        function logout() {
+            currentUser = { login: null, role: null, token: null };
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userLogin');
+            localStorage.removeItem('userName');
+            renderApp();
+        }
+
+        // --- Funções de Tema ---
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateDarkModeIcon();
+        }
+
+        function updateDarkModeIcon() {
+            const iconElement = document.getElementById('dark-mode-icon');
+            if (document.documentElement.classList.contains('dark')) {
+                iconElement.innerHTML = icons.Sun;
+            } else {
+                iconElement.innerHTML = icons.Moon;
+            }
+        }
+
+        // --- Funções de API ---
+        async function apiFetch(endpoint, options = {}) {
+        const defaultHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.token}`,
+        };
+
+        const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+        ...options,
+        headers: {
+            ...defaultHeaders,
+            ...(options.headers || {})
+        }
+        });
+
+        if (response.status === 401) {
+        logout();
+        return null;
+        }
+    
+        return response;
+        }
+
+
+        // --- Funções de Carregamento de Dados ---
+       
+
+        async function carregarUsuarios() {
+            try {
+                const response = await apiFetch('/api/usuarios');
+                if (response && response.ok) {
+                    return await response.json();
+                }
+                return [];
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                return [];
+            }
+        }
+
+
+        async function carregarFeedbacks() {
+            try {
+            const token = localStorage.getItem('userToken');
+            const userRole = localStorage.getItem('userRole');
+        
+        // Sempre usar '/api/feedbacks' — o backend já retorna apenas os feedbacks
+        // visíveis para o usuário autenticado (públicos + próprios + destinados a ele).
+        const endpoint = '/api/feedbacks';
+        const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const feedbacks = await response.json();
+            console.log('✅ Feedbacks carregados:', feedbacks);
+            // Debug extra: mostrar quantidade de respostas por feedback recebido
+            feedbacks.forEach(f => {
+                const respostasCount = (f.respostas && f.respostas.length) ? f.respostas.length : (f.resposta ? 1 : 0);
+                console.log(`🔎 Feedback ID ${f.id} - respostasCount: ${respostasCount}`, f.respostas ? f.respostas : f.resposta);
+            });
+            todosFeedbacks = feedbacks;
+            return feedbacks;
+        } else {
+            throw new Error(`Erro ${response.status}`);
+        }
+        } catch (error) {
+            console.error('Erro:', error);
+                return [];
+        }
+        }
+
+        // Utilitário: retorna a última resposta disponível no feedback
+        function obterUltimaResposta(feedback) {
+            if (!feedback) return null;
+            if (feedback.resposta) return feedback.resposta; // compatibilidade retroativa
+            if (feedback.respostas && feedback.respostas.length > 0) {
+                return feedback.respostas[feedback.respostas.length - 1];
+            }
+            return null;
+        }
+
+                // Utilitário: retorna array de respostas (compatível com `resposta` singular ou `respostas[]`)
+                function obterRespostas(feedback) {
+                    if (!feedback) return [];
+                    if (Array.isArray(feedback.respostas) && feedback.respostas.length > 0) return feedback.respostas;
+                    if (feedback.resposta) return [feedback.resposta];
+                    return [];
+                }
+
+
+
+        // --- Páginas do Sistema ---
+        function dashboardPage() {
+            return `
+                <div class="space-y-6">
+                    <h2 class="title-font text-4xl font-extrabold text-blue-600 dark:text-blue-400">Bem-vindo(a), ${currentUser.nome || currentUser.login}!</h2>
+                    <p class="text-xl text-gray-600 dark:text-gray-400">Seu papel no sistema: <span class="font-bold">${currentUser.role}</span></p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-blue-500">
+                            <h3 class="text-xl font-semibold mb-2">Total de Feedbacks</h3>
+                            <p class="text-4xl font-bold text-blue-600">${todosFeedbacks.length}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Registrados no sistema.</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+                            <h3 class="text-xl font-semibold mb-2">Em Aberto</h3>
+                            <p class="text-4xl font-bold text-yellow-500">${todosFeedbacks.filter(f => f.status === 'EM_ABERTO').length}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Aguardando análise.</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 border-green-500">
+                            <h3 class="text-xl font-semibold mb-2">Resolvidos</h3>
+                            <p class="text-4xl font-bold text-green-500">${todosFeedbacks.filter(f => f.status === 'RESOLVIDO').length}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Problemas resolvidos.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4 title-font">Feedbacks Recentes</h3>
+                        ${todosFeedbacks.slice(0, 5).map(f => `
+                            <div class="flex items-center justify-between p-3 border-b dark:border-gray-700 last:border-b-0">
+                                <div>
+                                    <p class="font-medium">${f.titulo}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Para: ${f.destinatario} | Em: ${new Date(f.dataEnvio).toLocaleDateString('pt-BR')}</p>
+                                </div>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full ${f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : (f.status === 'EM_ANALISE' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')}">
+                                    ${f.status}
+                                </span>
+                            </div>
+                        `).join('')}
+                        <button onclick="window.location.hash='#mural'" class="mt-4 text-blue-600 hover:text-blue-700 font-medium text-sm">Ver todos os feedbacks</button>
+                    </div>
+                </div>
+            `;
+        }
+
+       function sendFeedbackPage() {
+     const setores = [
+        'PROFESSOR', 'LIMPEZA', 'MANUTENCAO', 'SALAS_DE_AULA', 
+        'EQUIPAMENTOS', 'SETOR_APOIO', 'OPP', 'COORDENADOR',
+        'CANTINA', 'REFEITORIO', 'AUDITORIO', 'ALUNO'
+     ];
+    
+     let options = setores.map(d => `<option value="${d}">${d.replace(/_/g, ' ')}</option>`).join('');
+    
+     return `
+        <h2 class="title-font text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-6">Enviar Novo Feedback</h2>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-2xl">
+            <form id="feedback-form" onsubmit="event.preventDefault(); submitFeedback(event);">
+                <div class="mb-4">
+                    <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título do Feedback</label>
+                    <input type="text" id="titulo" required 
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Ex: Problema com projetor, Elogio à limpeza...">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="destinatario" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Setor Destinatário *</label>
+                    <select id="destinatario" required onchange="atualizarDestinatariosEspecificos(this.value)" 
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Selecione um setor</option>
+                        ${options}
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Selecione o setor que receberá este feedback</p>
+                </div>
+                
+                <div class="mb-4 hidden" id="destinatario-especifico-container">
+                    <label for="destinatarioEspecifico" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Destinatário Específico 
+                        <span class="text-xs text-gray-500">(Opcional - para feedback privado)</span>
+                    </label>
+                    <select id="destinatarioEspecifico" 
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Todos do setor (feedback público)</option>
+                        <option value="" disabled>-- Carregando destinatários --</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <strong>Selecionar uma pessoa:</strong> Feedback será privado (só ela verá)<br>
+                        <strong>Deixar em branco:</strong> Feedback será público (todo o setor vê)
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="conteudo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição do Feedback *</label>
+                    <textarea id="conteudo" rows="5" required 
+                              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Descreva em detalhes seu feedback, sugestão ou problema..."></textarea>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="isPublico" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                            🌐 Tornar feedback público (visível para todos)
+                        </span>
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <strong>📝 Como funciona:</strong><br>
+                        • <strong>Público:</strong> Todos os usuários do sistema podem ver<br>
+                        • <strong>Privado com destinatário:</strong> Apenas a pessoa selecionada vê<br>
+                        • <strong>Privado sem destinatário:</strong> Apenas o setor selecionado vê
+                    </p>
+                </div>
+                
+                <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors duration-300 flex items-center justify-center space-x-2">
+                    <span class="w-5 h-5" x-html="icons.Send"></span>
+                    <span>Enviar Feedback</span>
+                </button>
+                <p id="feedback-message" class="mt-4 text-center hidden"></p>
+            </form>
+        </div>
+     `;
+        }
+
+        async function submitFeedback(event) {
+        const form = event.target;
+        const titulo = form.titulo.value;
+        const destinatario = form.destinatario.value;
+        
+        const destinatarioEspecificoElement = document.getElementById('destinatarioEspecifico');
+        const destinatarioEspecifico = destinatarioEspecificoElement ? 
+                                    destinatarioEspecificoElement.value : '';
+    
+        const conteudo = form.conteudo.value;
+        const isPublico = document.getElementById('isPublico').checked;
+        const messageElement = document.getElementById('feedback-message');
+
+        // 🔥 LÓGICA INTELIGENTE: Determinar se é público ou privado
+        const temDestinatarioEspecifico = destinatarioEspecifico && destinatarioEspecifico !== "";
+    
+        // Se tem destinatário específico, é sempre privado (ignora checkbox)
+        // Se não tem destinatário específico, usa o checkbox
+        const finalIsPublico = temDestinatarioEspecifico ? false : isPublico;
+
+        const payload = {
+        titulo: titulo,
+        conteudo: conteudo,
+        destinatario: destinatario,
+        destinatarioEspecifico: temDestinatarioEspecifico ? destinatarioEspecifico : null,
+        publico: finalIsPublico
+        };
+
+        console.log('📤 Enviando feedback:', payload);
+        console.log('🔍 Detalhes:', {
+            temDestinatarioEspecifico: temDestinatarioEspecifico,
+        checkboxPublico: isPublico,
+        finalIsPublico: finalIsPublico
+     });
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Enviando...';
+        submitBtn.disabled = true;
+
+        try {
+        const response = await fetch(`${BACKEND_URL}/api/feedbacks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log('📥 Resposta:', response.status);
+
+        if (response.ok) {
+            const feedbackCriado = await response.json();
+            
+            // Mensagem personalizada baseada no tipo de feedback
+            let mensagemSucesso = '✅ Feedback enviado com sucesso!';
+            if (temDestinatarioEspecifico) {
+                mensagemSucesso += ` (Privado para ${destinatarioEspecifico})`;
+            } else if (finalIsPublico) {
+                mensagemSucesso += ' (Público para todos)';
+            } else {
+                mensagemSucesso += ` (Privado para setor ${destinatario})`;
+            }
+            
+            messageElement.textContent = mensagemSucesso;
+            messageElement.className = 'mt-4 text-center text-green-500';
+            messageElement.classList.remove('hidden');
+            
+            form.reset();
+            
+            const destinatarioContainer = document.getElementById('destinatario-especifico-container');
+            if (destinatarioContainer) {
+                destinatarioContainer.style.display = 'none';
+            }
+            
+            await carregarFeedbacks();
+        } else {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Erro ao enviar feedback');
+        }
+        } catch (error) {
+        console.error('💥 Erro:', error);
+        messageElement.textContent = '❌ Erro ao enviar feedback: ' + error.message;
+        messageElement.className = 'mt-4 text-center text-red-500';
+        messageElement.classList.remove('hidden');
+     } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+     }
+     }
+
+     function muralPage() {
+     console.log('🎨 Renderizando mural com', todosFeedbacks.length, 'feedbacks');
+    
+     // Mostrar todos os feedbacks no console para debug
+     console.log('📋 Todos os feedbacks:', todosFeedbacks);
+    
+     let feedbacksVisiveis = [];
+    
+    if (currentUser.role === 'ADMINISTRADOR') {
+       feedbacksVisiveis = todosFeedbacks;
+       console.log('👑 Modo ADMIN - mostrando todos os feedbacks');
+    } else {
+       // Para usuários normais, mostrar APENAS feedbacks públicos no mural público
+       feedbacksVisiveis = todosFeedbacks.filter(f => {
+           const isPublico = f.publico === true;
+           console.log(`Feedback ${f.id}: público=${isPublico}`);
+           return isPublico;
+       });
+       console.log('👤 Modo usuário - mostrando (apenas públicos) ', feedbacksVisiveis.length, 'feedbacks visíveis');
+    }
+
+         return `
+        <div class="space-y-6">
+            <h2 class="title-font text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-6">Mural de Feedbacks</h2>
+            
+            <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-xl mb-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-blue-700 dark:text-blue-300">
+                            <strong>📊 Estatísticas:</strong> 
+                            ${todosFeedbacks.length} total | 
+                            ${feedbacksVisiveis.length} visíveis para você
+                        </p>
+                        <p class="text-blue-600 dark:text-blue-400 text-sm">
+                            Usuário: ${currentUser.login} | Role: ${currentUser.role}
+                        </p>
+                        <p class="text-blue-600 dark:text-blue-400 text-sm">
+                            🔥 <strong>Dica:</strong> Você vê feedbacks públicos + seus próprios + feedbacks destinados a você
+                        </p>
+                    </div>
+                    <button onclick="recarregarFeedbacks()" class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 flex items-center gap-2">
+                        🔄 Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <div id="mural-container">
+                ${feedbacksVisiveis.length > 0 ? 
+                    `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${feedbacksVisiveis.map(feedback => criarCardFeedback(feedback)).join('')}
+                    </div>` 
+                    : `
+                    <div class="text-center py-12">
+                        <div class="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl">
+                            <p class="text-6xl mb-4">📭</p>
+                            <p class="text-xl text-gray-600 dark:text-gray-400 mb-2">Nenhum feedback disponível</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                                ${todosFeedbacks.length === 0 ? 
+                                    'Não há feedbacks no sistema.' : 
+                                    'Não há feedbacks visíveis para seu usuário.'
+                                }
+                            </p>
+                            ${currentUser.role === 'ALUNO' ? `
+                                <a href="#send-feedback" class="text-blue-500 hover:text-blue-600 underline">
+                                    Envie o primeiro feedback!
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `}
+            </div>
+        </div>
+    `;
+}
+
+function criarCardFeedback(feedback) {
+    console.log('🎨 Criando card para feedback:', feedback);
+    
+    const isPublico = feedback.publico;
+    const dataEnvio = new Date(feedback.dataEnvio).toLocaleDateString('pt-BR');
+    const isDoUsuario = feedback.alunoId === currentUser.login;
+    const _resposta = obterUltimaResposta(feedback);
+    const temResposta = _resposta && _resposta.conteudo;
+    const respostaNome = temResposta ? _resposta.responsavelNome : '';
+    const respostaTipo = temResposta ? _resposta.responsavelTipo : '';
+    const respostaConteudo = temResposta ? _resposta.conteudo : '';
+    const respostaData = temResposta ? _resposta.dataResposta : null;
+    
+    // Informações de destinatário
+    const destinatarioInfo = feedback.destinatarioEspecifico ? 
+        `para ${feedback.destinatarioEspecifico}` : 
+        `para setor ${feedback.destinatario}`;
+
+    // Verificar permissões
+    const podeResponder = verificarPermissaoResposta(feedback);
+    // Permitir alteração de status somente para admin, destinatário específico ou membros do tipo destinatário
+    const podeAlterarStatus = currentUser.role === 'ADMINISTRADOR' || (feedback.destinatarioEspecifico ? feedback.destinatarioEspecifico === currentUser.login : feedback.destinatario === currentUser.role);
+
+    console.log('🔐 Permissões para feedback', feedback.id, ':', {
+        podeResponder,
+        podeAlterarStatus,
+        usuario: currentUser.login,
+        role: currentUser.role
+    });
+
+    return `
+        <div class="feedback-card ${isPublico ? '' : 'feedback-card-privado'}">
+            <!-- Cabeçalho do Feedback -->
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex-1">
+                    <h3 class="font-bold text-lg mb-1 ${isPublico ? 'text-gray-800 dark:text-white' : 'text-white'}">
+                        ${feedback.titulo || 'Sem título'}
+                    </h3>
+                    <div class="text-sm ${isPublico ? 'text-gray-600 dark:text-gray-400' : 'text-purple-200'}">
+                        <div class="flex flex-wrap gap-2">
+                            <span>📍 ${destinatarioInfo}</span>
+                            <span>📅 ${dataEnvio}</span>
+                            <span>${isPublico ? '🌐 Público' : '🔒 Privado'}</span>
+                            ${isDoUsuario ? '<span>👤 Seu feedback</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                <span class="status-badge status-${(feedback.status || 'EM_ABERTO').toLowerCase()}">
+                    ${(feedback.status || 'EM_ABERTO').replace('_', ' ')}
+                </span>
+            </div>
+            
+            <!-- Conteúdo do Feedback -->
+            <div class="feedback-message mb-4">
+                <div class="${isPublico ? 'bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200' : 'bg-purple-900 text-white'} p-3 rounded-lg border ${isPublico ? 'border-gray-200 dark:border-gray-600' : 'border-purple-600'}">
+                    ${feedback.conteudo || 'Sem conteúdo'}
+                </div>
+            </div>
+            
+            <!-- Resposta Existente -->
+            ${temResposta ? `
+                <div class="feedback-response mb-4 ${isPublico ? 'bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-700' : 'bg-purple-800 border-purple-600'}">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="font-bold text-sm flex items-center gap-2 ${isPublico ? 'text-blue-700 dark:text-blue-300' : 'text-purple-200'}">
+                            <span>📝</span>
+                            <span>Resposta de ${respostaNome}</span>
+                        </div>
+                        <span class="text-xs ${isPublico ? 'text-blue-600 dark:text-blue-400' : 'text-purple-300'}">
+                            ${respostaTipo}
+                        </span>
+                    </div>
+                    <div class="text-sm ${isPublico ? 'text-gray-700 dark:text-gray-300' : 'text-white'} mb-2">
+                        ${respostaConteudo}
+                    </div>
+                    <div class="text-xs ${isPublico ? 'text-blue-500 dark:text-blue-400' : 'text-purple-300'}">
+                        📅 ${respostaData ? new Date(respostaData).toLocaleDateString('pt-BR') : ''} 
+                        ⏰ ${respostaData ? new Date(respostaData).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) : ''}
+                    </div>
+                </div>
+            ` : ''}
+            
+            <!-- Ações (Responder e Alterar Status) -->
+            ${podeResponder || podeAlterarStatus ? `
+                <div class="feedback-actions">
+                    <div class="flex flex-wrap gap-2">
+                        ${podeResponder ? `
+                            <button onclick="mostrarModalResposta(${feedback.id})" 
+                                    class="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-md">
+                                <span>${temResposta ? '✏️' : '💬'}</span>
+                                <span>${temResposta ? 'Editar Resposta' : 'Responder'}</span>
+                            </button>
+                        ` : ''}
+                        
+                        ${podeAlterarStatus ? `
+                            <button onclick="alterarStatusRapido(${feedback.id})" 
+                                    class="px-4 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 shadow-md">
+                                <span>🔄</span>
+                                <span>Alterar Status</span>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            ` : ''}
+            
+            <!-- Debug Info (apenas no console) -->
+            <!-- Logs moved to outer script via console.debug to avoid inline <script> in template -->
+        </div>
+    `;
+}
+
+    
+// 🔥 FUNÇÃO PARA ALTERAR STATUS RÁPIDO (substitui a antiga)
+async function alterarStatusRapido(feedbackId) {
+    const feedback = todosFeedbacks.find(f => f.id === feedbackId);
+    if (!feedback) return;
+    
+    const statusAtual = feedback.status;
+    const opcoesStatus = [
+        { value: 'EM_ABERTO', label: '🟡 Em Aberto', desc: 'Aguardando análise' },
+        { value: 'EM_ANALISE', label: '🟠 Em Análise', desc: 'Sendo analisado' },
+        { value: 'RESOLVIDO', label: '🟢 Resolvido', desc: 'Concluído' }
+    ];
+    
+    // Criar modal de status rápido
+    const modalHTML = `
+        <div id="modal-status" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4">
+                <div class="p-4 border-b dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+                        🔄 Alterar Status
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        "${feedback.titulo}"
+                    </p>
+                </div>
+                
+                <div class="p-4">
+                    <div class="space-y-2">
+                        ${opcoesStatus.map(status => `
+                            <button 
+                                onclick="confirmarAlteracaoStatus(${feedbackId}, '${status.value}')"
+                                class="w-full text-left p-3 rounded-lg border-2 transition-all ${
+                                    status.value === statusAtual ? 
+                                    'border-blue-500 bg-blue-50 dark:bg-blue-900' : 
+                                    'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                                }"
+                            >
+                                <div class="font-medium">${status.label}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">${status.desc}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-t dark:border-gray-700">
+                        <button onclick="fecharModalStatus()" class="w-full px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function fecharModalStatus() {
+    const modal = document.getElementById('modal-status');
+    if (modal) modal.remove();
+}
+
+async function confirmarAlteracaoStatus(feedbackId, novoStatus) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/feedbacks/${feedbackId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
+            },
+            body: JSON.stringify({
+                status: novoStatus
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Status alterado com sucesso');
+            fecharModalStatus();
+            await recarregarFeedbacks();
+            mostrarNotificacao('✅ Status atualizado com sucesso!', 'success');
+        } else {
+            const error = await response.text();
+            console.error('❌ Erro ao alterar status:', error);
+            mostrarNotificacao(`❌ Erro: ${error}`, 'error');
+        }
+    } catch (error) {
+        console.error('💥 Erro de conexão:', error);
+        mostrarNotificacao('❌ Erro de conexão', 'error');
+    }
+}
+
+// 🔥 FUNÇÃO PARA VERIFICAR PERMISSÃO DE RESPOSTA (atualizada)
+// 🔥 CORREÇÃO COMPLETA - Substitua a função atual
+function verificarPermissaoResposta(feedback) {
+    const userRole = currentUser.role;
+    const userLogin = currentUser.login;
+    
+    console.log('🔐 VERIFICANDO PERMISSÃO:', {
+        usuario: userLogin,
+        role: userRole,
+        feedback: feedback.id,
+        alunoId: feedback.alunoId,
+        publico: feedback.publico,
+        destinatario: feedback.destinatario,
+        destinatarioEspecifico: feedback.destinatarioEspecifico
+    });
+
+    // Bloquear respostas se já estiver resolvido
+    if (feedback.status === 'RESOLVIDO') {
+        console.log('⛔ Feedback RESOLVIDO - Nenhuma nova resposta permitida');
+        return false;
+    }
+
+    // 1. Administrador pode responder qualquer feedback
+    if (userRole === 'ADMINISTRADOR') {
+        console.log('✅ ADMIN - Pode responder qualquer feedback');
+        return true;
+    }
+
+    // 2. O próprio autor pode responder enquanto não estiver resolvido
+    if (feedback.alunoId === userLogin) {
+        console.log('✅ AUTOR - Pode responder próprio feedback (enquanto não resolvido)');
+        return true;
+    }
+
+    const isPublico = feedback.publico;
+    const isDestinatarioEspecifico = feedback.destinatarioEspecifico === userLogin;
+    const isMesmoGrupo = feedback.destinatario === userRole;
+
+    console.log('🔍 Análise de permissão:', {
+        isPublico,
+        isDestinatarioEspecifico,
+        isMesmoGrupo
+    });
+
+    // 3. Feedback PÚBLICO: Qualquer usuário do mesmo grupo pode responder
+    if (isPublico) {
+        const podeResponderPublico = isMesmoGrupo;
+        console.log(`🌐 Feedback PÚBLICO - Mesmo grupo? ${isMesmoGrupo} → Pode responder: ${podeResponderPublico}`);
+        return podeResponderPublico;
+    }
+    
+    // 4. Feedback PRIVADO: Apenas o destinatário específico pode responder
+    if (feedback.destinatarioEspecifico && feedback.destinatarioEspecifico !== "") {
+        const podeResponderPrivado = isDestinatarioEspecifico;
+        console.log(`🔒 Feedback PRIVADO com destinatário específico - É o destinatário? ${isDestinatarioEspecifico} → Pode responder: ${podeResponderPrivado}`);
+        return podeResponderPrivado;
+    }
+    
+    // 5. Feedback privado sem destinatário específico: qualquer usuário do grupo
+    const podeResponderGrupo = isMesmoGrupo;
+    console.log(`👥 Feedback PRIVADO sem destinatário específico - Mesmo grupo? ${isMesmoGrupo} → Pode responder: ${podeResponderGrupo}`);
+    return podeResponderGrupo;
+}
+
+
+
+
+
+
+/**
+ * 🔄 Atualizar lista de destinatários específicos
+ */
+async function atualizarDestinatariosEspecificos(tipoSelecionado) {
+    const container = document.getElementById('destinatario-especifico-container');
+    const select = document.getElementById('destinatarioEspecifico');
+    
+    if (!container || !select) {
+        console.warn('⚠️ Elementos de destinatário específico não encontrados');
+        return;
+    }
+    
+    if (tipoSelecionado) {
+        // Mostrar container e mostrar loading
+        container.style.display = 'block';
+        select.innerHTML = '<option value="">Carregando destinatários...</option>';
+        
+        try {
+            // 🔥 CORREÇÃO: Carregar destinatários do backend
+            console.log('🔍 Buscando destinatários para tipo:', tipoSelecionado);
+            
+            const response = await fetch(`${BACKEND_URL}/api/usuarios/destinatarios/${tipoSelecionado}`, {
+                headers: {
+                    'Authorization': `Bearer ${currentUser.token}`
+                }
+            });
+
+            if (response.ok) {
+                const destinatarios = await response.json();
+                console.log('✅ Destinatários carregados:', destinatarios);
+                
+                // Popular o select
+                select.innerHTML = '<option value="">Todos do setor (feedback público)</option>';
+                
+                if (destinatarios && destinatarios.length > 0) {
+                    destinatarios.forEach(usuario => {
+                        const option = document.createElement('option');
+                        option.value = usuario.login;
+                        option.textContent = `${usuario.nome} (${usuario.login}) - ${usuario.tipo}`;
+                        select.appendChild(option);
+                    });
+                    
+                    console.log(`✅ ${destinatarios.length} destinatários carregados para ${tipoSelecionado}`);
+                } else {
+                    select.innerHTML = '<option value="" disabled>Nenhum usuário encontrado neste setor</option>';
+                    console.warn(`⚠️ Nenhum destinatário encontrado para ${tipoSelecionado}`);
+                }
+            } else {
+                console.error('❌ Erro ao carregar destinatários:', response.status);
+                select.innerHTML = '<option value="" disabled>Erro ao carregar destinatários</option>';
+            }
+        } catch (error) {
+            console.error('💥 Erro de conexão:', error);
+            select.innerHTML = '<option value="" disabled>Erro de conexão</option>';
+        }
+    } else {
+        // Esconder container se nenhum setor selecionado
+        container.style.display = 'none';
+        select.innerHTML = '<option value="">Todos do setor (feedback público)</option>';
+    }
+}
+
+
+
+
+/**
+ * 💬 Responder a um feedback
+ */
+async function responderFeedback(feedbackId) {
+    const feedback = todosFeedbacks.find(f => f.id === feedbackId);
+    if (!feedback) return;
+    const _resposta = obterUltimaResposta(feedback);
+    const temResposta = _resposta && _resposta.conteudo;
+    const respostaAtual = temResposta ? _resposta.conteudo : '';
+    
+    // Diálogo para resposta
+    const resposta = prompt(
+        `Digite sua resposta para o feedback "${feedback.titulo}":\n\nStatus atual: ${feedback.status}`,
+        respostaAtual
+    );
+    
+    if (resposta === null) return; // Usuário cancelou
+    
+    if (resposta && resposta.trim()) {
+        // Diálogo para status (opcional)
+        const novoStatus = confirm(`Deseja alterar o status do feedback para "EM_ANÁLISE"?\n\n• Cancelar = Manter status atual\n• OK = Alterar para EM_ANÁLISE`);
+        
+        const payload = {
+            conteudo: resposta.trim(),
+            novoStatus: novoStatus ? 'EM_ANALISE' : null
+        };
+        
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/feedbacks/${feedbackId}/responder`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}`
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            if (response.ok) {
+                console.log('✅ Resposta enviada com sucesso');
+                await recarregarFeedbacks();
+            } else {
+                const error = await response.text();
+                alert('Erro ao enviar resposta: ' + error);
+            }
+        } catch (error) {
+            console.error('💥 Erro:', error);
+            alert('Erro de conexão ao enviar resposta');
+        }
+    }
+}
+
+/**
+ * 🔄 Alterar status do feedback
+ */
+async function alterarStatusFeedback(feedbackId) {
+    const feedback = todosFeedbacks.find(f => f.id === feedbackId);
+    if (!feedback) return;
+    
+    const statusAtual = feedback.status;
+    const opcoesStatus = ['EM_ABERTO', 'EM_ANALISE', 'RESOLVIDO'];
+    
+    const novoStatus = prompt(
+        `Alterar status do feedback "${feedback.titulo}":\n\nStatus atual: ${statusAtual}\n\nNovo status (digite um dos seguintes):\n• EM_ABERTO\n• EM_ANALISE\n• RESOLVIDO`,
+        statusAtual
+    );
+    
+    if (novoStatus && opcoesStatus.includes(novoStatus.toUpperCase())) {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/feedbacks/${feedbackId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}`
+                },
+                body: JSON.stringify({
+                    status: novoStatus.toUpperCase()
+                })
+            });
+            
+            if (response.ok) {
+                console.log('✅ Status alterado com sucesso');
+                await recarregarFeedbacks();
+            } else {
+                const error = await response.text();
+                alert('Erro ao alterar status: ' + error);
+            }
+        } catch (error) {
+            console.error('💥 Erro:', error);
+            alert('Erro de conexão ao alterar status');
+        }
+    } else if (novoStatus) {
+        alert('Status inválido. Use: EM_ABERTO, EM_ANALISE ou RESOLVIDO');
+    }
+}
+
+/**
+ * ✏️ Editar resposta existente
+ */
+async function editarResposta(feedbackId) {
+    await responderFeedback(feedbackId); // Reusa a mesma função
+}
+
+
+
+
+
+            function filtrarMural() {
+                const statusFilter = document.getElementById('filter-status').value;
+                const setorFilter = document.getElementById('filter-setor').value;
+                
+                const feedbacksFiltrados = todosFeedbacks.filter(f => {
+                    const matchStatus = !statusFilter || f.status === statusFilter;
+                    const matchSetor = !setorFilter || f.destinatario === setorFilter;
+                    // Administrador vê tudo; usuários normais apenas feedbacks públicos
+                    const isPublico = (currentUser.role === 'ADMINISTRADOR') ? true : (f.publico === true);
+                    
+                    return matchStatus && matchSetor && isPublico;
+                });
+                
+                const container = document.getElementById('mural-container');
+                container.innerHTML = feedbacksFiltrados.map(feedback => criarCardFeedback(feedback)).join('');
+            }
+
+        // 🔥 CORREÇÃO COMPLETA da função myFeedbacksPage
+// 🔥 ATUALIZAÇÃO - Adicione mais logs de debug
+function myFeedbacksPage() {
+    console.log('=== 🎯 MY FEEDBACKS PAGE ===');
+    console.log('Usuário atual:', currentUser.login);
+    console.log('Total de feedbacks carregados:', todosFeedbacks.length);
+    
+    // DEBUG DETALHADO
+    console.log('=== TODOS OS FEEDBACKS CARREGADOS ===');
+    todosFeedbacks.forEach((f, index) => {
+        console.log(`${index + 1}. ID: ${f.id} | Aluno: ${f.alunoId} | Título: ${f.titulo} | É meu? ${f.alunoId === currentUser.login}`);
+    });
+    
+    const meusFeedbacks = todosFeedbacks.filter(f => {
+        const isMeu = f.alunoId === currentUser.login;
+        // Feedbacks privados destinados a mim (destinatarioEspecifico igual ao meu login)
+        // ou destinados ao meu setor/role devem aparecer em 'Meus Feedbacks'
+        const isPrivadoDestinadoAmi = (f.publico === false) && (
+            (f.destinatarioEspecifico && f.destinatarioEspecifico === currentUser.login) ||
+            (f.destinatario && f.destinatario === currentUser.role)
+        );
+
+        // Incluir feedbacks onde eu já respondi (participante da conversa)
+        const respostas = obterRespostas(f);
+        const isRespondente = respostas.some(r => r && r.responsavelId === currentUser.login);
+
+        if (isMeu || isPrivadoDestinadoAmi || isRespondente) {
+            console.log(`✅ ENCONTRADO MEU/DESTINADO/RESPONDENTE FEEDBACK: ID ${f.id} - "${f.titulo}"`);
+        }
+
+        return isMeu || isPrivadoDestinadoAmi || isRespondente;
+    });
+    
+    console.log('=== RESULTADO FINAL ===');
+    console.log('Meus feedbacks encontrados:', meusFeedbacks.length);
+    meusFeedbacks.forEach(f => console.log('📋 Meu feedback:', f.id, f.titulo));
+
+    return `
+        <div class="space-y-6">
+            <h2 class="title-font text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-6">Meus Feedbacks</h2>
+            
+            <!-- ESTATÍSTICAS -->
+            <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-xl mb-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-blue-700 dark:text-blue-300">
+                            <strong>📊 Estatísticas:</strong> 
+                            ${meusFeedbacks.length} feedbacks enviados
+                        </p>
+                    </div>
+                    <button onclick="recarregarFeedbacks()" class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 flex items-center gap-2">
+                        🔄 Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                ${meusFeedbacks.length > 0 ? 
+                    meusFeedbacks.map(f => `
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border-l-4 ${
+                            f.status === 'EM_ABERTO' ? 'border-red-500' : 
+                            (f.status === 'EM_ANALISE' ? 'border-yellow-500' : 'border-green-500')
+                        }">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-xl mb-1">${f.titulo || 'Sem título'}</h3>
+                                    <div class="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                        <span>📍 <strong>Destinatário:</strong> ${f.destinatario} ${f.destinatarioEspecifico ? `(${f.destinatarioEspecifico})` : ''}</span>
+                                        <span>🌐 <strong>Visibilidade:</strong> ${f.publico ? 'Público' : 'Privado'}</span>
+                                        <span>📅 <strong>Enviado em:</strong> ${new Date(f.dataEnvio).toLocaleDateString('pt-BR')}</span>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full ${
+                                    f.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : 
+                                    (f.status === 'EM_ANALISE' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' : 
+                                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300')
+                                }">
+                                    ${f.status.replace('_', ' ')}
+                                </span>
+                            </div>
+                            
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">${f.conteudo || 'Sem conteúdo'}</p>
+                            
+                            ${ (obterRespostas(f).length > 0) ? `
+                                <div class="mt-3 space-y-3">
+                                    ${obterRespostas(f).map(r => `
+                                        <div class="p-3 rounded-lg ${r.responsavelId === f.alunoId ? 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700' : 'bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700'}">
+                                            <div class="flex justify-between items-center mb-1">
+                                                <div class="text-sm font-medium">${r.responsavelNome} <span class="text-xs text-gray-500">(${r.responsavelTipo})</span></div>
+                                                <div class="text-xs text-gray-500">${r.dataResposta ? new Date(r.dataResposta).toLocaleDateString('pt-BR') + ' ' + new Date(r.dataResposta).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : ''}</div>
+                                            </div>
+                                            <div class="text-sm ${r.responsavelId === currentUser.login ? 'text-gray-800 dark:text-gray-200' : 'text-gray-700 dark:text-gray-300'}">${r.conteudo}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div class="text-sm text-gray-500 dark:text-gray-400 italic">
+                                    ⏳ Aguardando resposta...
+                                </div>
+                            `}
+
+                            <!-- Ações (Responder e Alterar Status) para Meus Feedbacks -->
+                            ${ (verificarPermissaoResposta(f) || (currentUser.role === 'ADMINISTRADOR' || (f.destinatarioEspecifico ? f.destinatarioEspecifico === currentUser.login : f.destinatario === currentUser.role))) ? `
+                                <div class="feedback-actions mt-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        ${verificarPermissaoResposta(f) ? `
+                                            ${obterRespostas(f).find(r => r && r.responsavelId === currentUser.login) ? `
+                                                <button onclick="editarResposta(${f.id})" 
+                                                        class="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-md">
+                                                    <span>✏️</span>
+                                                    <span>Editar Minha Resposta</span>
+                                                </button>
+                                            ` : `
+                                                <button onclick="mostrarModalResposta(${f.id})" 
+                                                        class="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-md">
+                                                    <span>💬</span>
+                                                    <span>Responder</span>
+                                                </button>
+                                            `}
+                                        ` : ''}
+
+                                        ${(currentUser.role === 'ADMINISTRADOR' || (f.destinatarioEspecifico ? f.destinatarioEspecifico === currentUser.login : f.destinatario === currentUser.role)) ? `
+                                            <button onclick="alterarStatusRapido(${f.id})" 
+                                                    class="px-4 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 shadow-md">
+                                                <span>🔄</span>
+                                                <span>Alterar Status</span>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('') 
+                    : `
+                    <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+                        <div class="max-w-md mx-auto">
+                            <div class="text-6xl mb-4">📭</div>
+                            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                                Nenhum feedback enviado
+                            </h3>
+                            <p class="text-gray-500 dark:text-gray-500 mb-6">
+                                Você ainda não enviou nenhum feedback.
+                            </p>
+                            <a href="#send-feedback" 
+                               class="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
+                                <span>📤</span>
+                                <span>Enviar Meu Primeiro Feedback</span>
+                            </a>
+                        </div>
+                    </div>
+                `}
+            </div>
+        </div>
+    `;
+}
+
+        function usersPage() {
+            if (currentUser.role !== 'ADMINISTRADOR') {
+                return `<div class="p-6 bg-red-100 dark:bg-red-900 rounded-xl text-red-700 dark:text-red-300">Acesso negado. Apenas Administradores podem visualizar esta página.</div>`;
+            }
+
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-6">Gestão de Usuários</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div id="users-list" class="space-y-4">
+                        <div class="text-center py-4 text-gray-500">Carregando usuários...</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function carregarUsuariosParaLista() {
+            if (currentUser.role !== 'ADMINISTRADOR') return;
+            
+            const usuarios = await carregarUsuarios();
+            const container = document.getElementById('users-list');
+            
+            if (usuarios.length > 0) {
+                container.innerHTML = usuarios.map(usuario => `
+                    <div class="flex items-center justify-between p-4 border-b dark:border-gray-700">
+                        <div>
+                            <p class="font-medium">${usuario.nome}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${usuario.login} • ${usuario.tipoUsuario}</p>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            ${usuario.tipoUsuario}
+                        </span>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="text-center py-4 text-gray-500">Nenhum usuário encontrado.</div>';
+            }
+        }
+
+        function cadastroPage() {
+            const tiposUsuario = [
+                'ALUNO', 'PROFESSOR', 'LIMPEZA', 'MANUTENCAO', 'OPP', 
+                'SETOR_APOIO', 'COORDENADOR', 'GESTOR', 'ADMINISTRADOR'
+            ];
+            
+            let options = tiposUsuario.map(t => `<option value="${t}">${t.replace(/_/g, ' ')}</option>`).join('');
+            
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-6">Cadastrar Novo Usuário</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-2xl">
+                    <form id="cadastro-form" class="space-y-4" onsubmit="event.preventDefault(); handleCadastro();">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Login (CPF/Matrícula)</label>
+                            <input type="text" id="cadastro-login" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CPF</label>
+                            <input type="text" id="cadastro-cpf" required maxlength="11" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label>
+                            <input type="text" id="cadastro-nome" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Usuário</label>
+                            <select id="cadastro-tipo" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+                                ${options}
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors duration-300">
+                            Cadastrar Usuário
+                        </button>
+                        <p id="cadastro-error" class="text-red-500 hidden text-sm text-center"></p>
+                        <p id="cadastro-success" class="text-green-500 hidden text-sm text-center"></p>
+                    </form>
+                </div>
+            `;
+        }
+
+        async function handleCadastro() {
+    if (currentUser.role !== 'ADMINISTRADOR') {
+        mostrarMensagemCadastro('Apenas administradores podem cadastrar usuários.', false);
+        return;
+    }
+
+    const login = document.getElementById('cadastro-login').value.trim();
+    const cpf = document.getElementById('cadastro-cpf').value.trim();
+    const nome = document.getElementById('cadastro-nome').value.trim();
+    const tipoUsuario = document.getElementById('cadastro-tipo').value;
+
+    if (!login || !cpf || !nome || !tipoUsuario) {
+        mostrarMensagemCadastro('Preencha todos os campos.', false);
+        return;
+    }
+
+    if (cpf.length !== 11) {
+        mostrarMensagemCadastro('CPF deve ter 11 dígitos.', false);
+        return;
+    }
+
+    // 🔥 CORREÇÃO: Payload compatível com o backend Spring Boot
+    const payload = {
+        login: login,
+        cpf: cpf,
+        nome: nome,
+        senha: 'mudar123', // Senha padrão para primeiro acesso
+        tipoUsuario: tipoUsuario,
+        primeiroAcesso: true
+    };
+
+    console.log('📤 Enviando payload:', payload);
+
+    // Mostrar loading
+    const submitBtn = document.querySelector('#cadastro-form button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Cadastrando...';
+    submitBtn.disabled = true;
+
+    try {
+        // 🔥 CORREÇÃO: Endpoint correto e tratamento de resposta
+        const response = await fetch(`${BACKEND_URL}/api/usuarios`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log('📥 Resposta do servidor:', response.status);
+
+        // 🔥 CORREÇÃO CRÍTICA: Ler a resposta UMA ÚNICA VEZ
+        let responseData;
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+            responseData = await response.json();
+        } else {
+            responseData = await response.text();
+        }
+
+        if (response.ok) {
+            mostrarMensagemCadastro('✅ Usuário cadastrado com sucesso! Senha temporária: mudar123', true);
+            document.getElementById('cadastro-form').reset();
+        } else {
+            let errorMessage = 'Erro ao cadastrar usuário';
+            
+            // 🔥 CORREÇÃO: Usar os dados já lidos da resposta
+            if (typeof responseData === 'object' && responseData.error) {
+                errorMessage = responseData.error;
+            } else if (typeof responseData === 'string' && responseData) {
+                errorMessage = responseData;
+            }
+            
+            console.error('❌ Erro detalhado:', errorMessage);
+            
+            if (response.status === 403) {
+                errorMessage = 'Acesso negado. Verifique se você tem permissão de administrador.';
+            } else if (response.status === 409) {
+                errorMessage = 'Usuário já existe (CPF ou login duplicado).';
+            } else if (response.status === 400) {
+                errorMessage = 'Dados inválidos: ' + errorMessage;
+            }
+            
+            mostrarMensagemCadastro(`❌ ${errorMessage}`, false);
+        }
+    } catch (error) {
+        console.error('💥 Erro de conexão:', error);
+        
+        let errorMessage = 'Erro de conexão com o servidor. ';
+        
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+            errorMessage += 'Verifique se:\n';
+            errorMessage += '1. O backend Spring Boot está rodando na porta 8080\n';
+            errorMessage += '2. A URL do backend está correta\n';
+            errorMessage += '3. Não há problemas de rede ou firewall';
+        } else {
+            errorMessage += error.message;
+        }
+        
+        mostrarMensagemCadastro(errorMessage, false);
+    } finally {
+        // Restaurar botão
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+        function mostrarMensagemCadastro(mensagem, sucesso) {
+    const errorElement = document.getElementById('cadastro-error');
+    const successElement = document.getElementById('cadastro-success');
+    
+    // Limpar mensagens anteriores
+    errorElement.classList.add('hidden');
+    successElement.classList.add('hidden');
+    
+    if (sucesso) {
+        successElement.textContent = mensagem;
+        successElement.classList.remove('hidden');
+        errorElement.classList.add('hidden');
+        
+        // Auto-esconder mensagem de sucesso após 5 segundos
+        setTimeout(() => {
+            successElement.classList.add('hidden');
+        }, 5000);
+    } else {
+        errorElement.textContent = mensagem;
+        errorElement.classList.remove('hidden');
+        successElement.classList.add('hidden');
+    }
+}
+
+        function changePasswordPage() {
+            return `
+                <h2 class="title-font text-4xl font-extrabold text-blue-600 dark:text-blue-400 mb-6">Trocar Senha</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg max-w-md">
+                    <form onsubmit="event.preventDefault(); handleChangePassword();">
+                        <div class="mb-4">
+                            <label for="current-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha Atual</label>
+                            <input type="password" id="current-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div class="mb-4">
+                            <label for="new-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nova Senha</label>
+                            <input type="password" id="new-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <div class="mb-6">
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Nova Senha</label>
+                            <input type="password" id="confirm-password" required class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl dark:bg-gray-700 dark:text-white">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-300">Salvar Nova Senha</button>
+                        <p id="password-message" class="mt-4 text-center hidden"></p>
+                    </form>
+                </div>
+            `;
+        }
+
+        async function handleChangePassword() {
+            const senhaAtual = document.getElementById('current-password').value;
+            const novaSenha = document.getElementById('new-password').value;
+            const confirmarSenha = document.getElementById('confirm-password').value;
+            const messageElement = document.getElementById('password-message');
+
+            if (novaSenha !== confirmarSenha) {
+                messageElement.textContent = '❌ As senhas não coincidem.';
+                messageElement.className = 'mt-4 text-center text-red-500';
+                messageElement.classList.remove('hidden');
+                return;
+            }
+
+            if (novaSenha.length < 6) {
+                messageElement.textContent = '❌ A senha deve ter pelo menos 6 caracteres.';
+                messageElement.className = 'mt-4 text-center text-red-500';
+                messageElement.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await apiFetch('/api/usuarios/trocar-senha', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        senhaAtual: senhaAtual,
+                        novaSenha: novaSenha
+                    })
+                });
+
+                if (response && response.ok) {
+                    messageElement.textContent = '✅ Senha alterada com sucesso!';
+                    messageElement.className = 'mt-4 text-center text-green-500';
+                    messageElement.classList.remove('hidden');
+                    
+                    // Limpar campos
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                } else {
+                    const error = await response.text();
+                    messageElement.textContent = '❌ Erro ao alterar senha: ' + error;
+                    messageElement.className = 'mt-4 text-center text-red-500';
+                    messageElement.classList.remove('hidden');
+                }
+            } catch (error) {
+                messageElement.textContent = '❌ Erro de conexão com o servidor.';
+                messageElement.className = 'mt-4 text-center text-red-500';
+                messageElement.classList.remove('hidden');
+            }
+        }
+
+        // --- Sistema de Rotas e Renderização ---
+        async function renderPage(pageName) {
+            const contentContainer = document.getElementById('page-content');
+            
+            // Remove a classe 'active' de todos os itens de navegação
+            document.querySelectorAll('.nav-item a').forEach(el => el.classList.remove('active'));
+
+            // Adiciona a classe 'active' ao link atual
+            const activeLink = document.querySelector(`.nav-item a[data-page="${pageName}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            let content = '';
+
+            switch (pageName) {
+                case 'dashboard':
+                    content = dashboardPage();
+                    break;
+                case 'send-feedback':
+                    content = sendFeedbackPage();
+                    break;
+                case 'mural':
+                    content = muralPage();
+                    break;
+                case 'my-feedbacks':
+                    content = myFeedbacksPage();
+                    break;
+                case 'users':
+                    content = usersPage();
+                    setTimeout(carregarUsuariosParaLista, 100);
+                    break;
+                case 'cadastro':
+                    content = cadastroPage();
+                    break;
+                case 'change-password':
+                    content = changePasswordPage();
+                    break;
+                default:
+                    content = dashboardPage();
+                    window.location.hash = '#dashboard';
+            }
+            
+            contentContainer.innerHTML = content;
+        }
+
+        async function renderApp() {
+            const authPage = document.getElementById('auth-page');
+            const navbar = document.getElementById('navbar');
+            const sidebar = document.getElementById('sidebar');
+
+            // Verificar se há token salvo
+            const savedToken = localStorage.getItem('userToken');
+            const savedRole = localStorage.getItem('userRole');
+            const savedLogin = localStorage.getItem('userLogin');
+            const savedName = localStorage.getItem('userName');
+
+            if (savedToken && savedRole && savedLogin) {
+                // Usuário logado
+                currentUser = {
+                    token: savedToken,
+                    role: savedRole,
+                    login: savedLogin,
+                    nome: savedName
+                };
+
+                authPage.classList.add('hidden');
+                navbar.classList.remove('hidden');
+                sidebar.classList.remove('hidden');
+
+                document.getElementById('user-info').innerHTML = `${icons.User} <span class="ml-1">${currentUser.nome || currentUser.login} (${currentUser.role})</span>`;
+
+                // Exibir/Esconder itens de navegação baseados na Role
+                const adminOnly = document.querySelectorAll('.admin-only');
+                if (currentUser.role === 'ADMINISTRADOR') {
+                    adminOnly.forEach(el => el.classList.remove('hidden'));
+                } else {
+                    adminOnly.forEach(el => el.classList.add('hidden'));
+                }
+
+                // Carregar dados
+                await carregarFeedbacks();
+
+                // Navegação
+                let targetPage = window.location.hash.substring(1) || 'dashboard';
+                await renderPage(targetPage);
+
+            } else {
+                // Não autenticado
+                authPage.classList.remove('hidden');
+                navbar.classList.add('hidden');
+                sidebar.classList.add('hidden');
+            }
+            
+            updateDarkModeIcon();
+        }
+
+
+
+
+// 🔥 CORREÇÃO COMPLETA - Substitua a função atual
+async function carregarFeedbacks() {
+    try {
+        const token = localStorage.getItem('userToken');
+        const userRole = localStorage.getItem('userRole');
+        const userLogin = localStorage.getItem('userLogin');
+        
+        console.log('🔍 Iniciando carregamento de feedbacks...');
+        console.log('👤 Usuário:', userLogin, '| Role:', userRole);
+        
+        let endpoint = '/api/feedbacks';
+        
+        // 🔥 CORREÇÃO: SEMPRE usar o endpoint principal para carregar TODOS os feedbacks
+        // O filtro de visibilidade será feito no frontend
+        console.log('📡 Usando endpoint:', endpoint);
+        
+        const response = await fetch(`http://localhost:8080${endpoint}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            const feedbacks = await response.json();
+            console.log('✅ TODOS os feedbacks carregados:', feedbacks.length);
+            
+            // 🔥 DEBUG: Mostrar cada feedback carregado
+            feedbacks.forEach((f, index) => {
+                console.log(`${index + 1}. ID: ${f.id} | Aluno: ${f.alunoId} | Título: ${f.titulo} | Público: ${f.publico}`);
+            });
+            
+            todosFeedbacks = feedbacks;
+            return feedbacks;
+        } else {
+            console.error('❌ Erro ao carregar feedbacks:', response.status);
+            const errorText = await response.text();
+            console.error('Detalhes do erro:', errorText);
+            throw new Error(`Erro ${response.status}: ${errorText}`);
+        }
+    } catch (error) {
+        console.error('💥 Erro crítico ao carregar feedbacks:', error);
+        // 🔥 MOSTRAR ALERTA PARA O USUÁRIO
+        alert('Erro ao carregar feedbacks. Verifique o console para detalhes.');
+        return [];
+    }
+}
+
+
+/**
+ * 👥 Carregar destinatários específicos por tipo
+ */
+async function carregarDestinatariosPorTipo(tipoUsuario) {
+    try {
+        console.log('🔍 Buscando destinatários para:', tipoUsuario);
+        
+        const response = await fetch(`${BACKEND_URL}/api/usuarios/destinatarios/${tipoUsuario}`, {
+            headers: {
+                'Authorization': `Bearer ${currentUser.token}`
+            }
+        });
+
+        if (response.ok) {
+            const destinatarios = await response.json();
+            console.log(`✅ ${destinatarios.length} destinatários encontrados para ${tipoUsuario}:`, destinatarios);
+            return destinatarios;
+        } else {
+            console.warn('⚠️ Nenhum destinatário encontrado para:', tipoUsuario);
+            return [];
+        }
+    } catch (error) {
+        console.error('❌ Erro ao carregar destinatários:', error);
+        return [];
+    }
+}
+
+
+
+// 🔥 MODAL DE RESPOSTA PROFISSIONAL
+
+function mostrarModalResposta(feedbackId) {
+    const feedback = todosFeedbacks.find(f => f.id === feedbackId);
+    if (!feedback) return;
+    const _resposta = obterUltimaResposta(feedback);
+    
+    const modalHTML = `
+        <div id="modal-resposta" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl mx-4">
+                <div class="p-6 border-b dark:border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white">
+                            💬 Responder Feedback
+                        </h3>
+                        <button onclick="fecharModalResposta()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                        Respondendo: <strong>"${feedback.titulo}"</strong>
+                    </p>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Informações do Feedback -->
+                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4">
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium">De:</span> ${feedback.alunoId}
+                            </div>
+                            <div>
+                                <span class="font-medium">Para:</span> ${feedback.destinatario}
+                                ${feedback.destinatarioEspecifico ? ` (${feedback.destinatarioEspecifico})` : ''}
+                            </div>
+                            <div>
+                                <span class="font-medium">Status:</span> 
+                                <span class="px-2 py-1 text-xs rounded-full ${feedback.status === 'EM_ABERTO' ? 'bg-red-100 text-red-800' : (feedback.status === 'EM_ANALISE' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800')}">
+                                    ${feedback.status.replace('_', ' ')}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="font-medium">Visibilidade:</span> 
+                                ${feedback.publico ? '🌐 Público' : '🔒 Privado'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulário de Resposta -->
+                    <form id="form-resposta" onsubmit="event.preventDefault(); enviarResposta(${feedbackId})">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Sua Resposta *
+                            </label>
+                            <textarea 
+                                id="resposta-conteudo" 
+                                rows="6" 
+                                required
+                                placeholder="Digite sua resposta aqui... Seja claro e objetivo."
+                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                            >${_resposta && _resposta.conteudo ? _resposta.conteudo : ''}</textarea>
+                        </div>
+                        
+                        <!-- Opções de Status -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                🔄 Atualizar Status (Opcional)
+                            </label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="flex items-center p-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-300 transition-colors">
+                                    <input type="radio" name="novoStatus" value="EM_ABERTO" ${feedback.status === 'EM_ABERTO' ? 'checked' : ''} class="mr-2">
+                                    <div>
+                                        <div class="font-medium">Em Aberto</div>
+                                        <div class="text-xs text-gray-500">Aguardando análise</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-yellow-300 transition-colors">
+                                    <input type="radio" name="novoStatus" value="EM_ANALISE" ${feedback.status === 'EM_ANALISE' ? 'checked' : ''} class="mr-2">
+                                    <div>
+                                        <div class="font-medium">Em Análise</div>
+                                        <div class="text-xs text-gray-500">Sendo analisado</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:border-green-300 transition-colors">
+                                    <input type="radio" name="novoStatus" value="RESOLVIDO" ${feedback.status === 'RESOLVIDO' ? 'checked' : ''} class="mr-2">
+                                    <div>
+                                        <div class="font-medium">Resolvido</div>
+                                        <div class="text-xs text-gray-500">Concluído</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Botões de Ação -->
+                        <div class="flex justify-end space-x-3 pt-4 border-t dark:border-gray-700">
+                            <button type="button" onclick="fecharModalResposta()" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
+                                <span>📤</span>
+                                <span>Enviar Resposta</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function fecharModalResposta() {
+    const modal = document.getElementById('modal-resposta');
+    if (modal) modal.remove();
+}
+
+
+// ✅ ADICIONAR ESTA FUNÇÃO - Ela está sendo chamada mas não existe
+function recarregarFeedbacks() {
+    console.log('🔄 Recarregando feedbacks...');
+    carregarFeedbacks().then(() => {
+        // Recarregar a página atual
+        const currentPage = window.location.hash.substring(1);
+        if (currentPage === 'mural' || currentPage === 'my-feedbacks') {
+            renderPage(currentPage);
+        }
+    });
+}
+
+
+
+// 🔥 FUNÇÃO PARA ENVIAR RESPOSTA
+async function enviarResposta(feedbackId) {
+    const form = document.getElementById('form-resposta');
+    const conteudo = document.getElementById('resposta-conteudo').value.trim();
+    const statusSelecionado = document.querySelector('input[name="novoStatus"]:checked');
+    
+    if (!conteudo) {
+        alert('Por favor, digite uma resposta.');
+        return;
+    }
+    
+    const payload = {
+        conteudo: conteudo,
+        novoStatus: statusSelecionado ? statusSelecionado.value : null
+    };
+    
+    console.log('📤 Enviando resposta:', payload);
+    
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> Enviando...';
+    submitBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/feedbacks/${feedbackId}/responder`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (response.ok) {
+            const feedbackAtualizado = await response.json();
+            console.log('✅ Resposta enviada com sucesso!', feedbackAtualizado);
+            
+            // Fechar modal e recarregar dados
+            fecharModalResposta();
+            await recarregarFeedbacks();
+            
+            // Mostrar mensagem de sucesso
+            mostrarNotificacao('✅ Resposta enviada com sucesso!', 'success');
+        } else {
+            const errorText = await response.text();
+            console.error('❌ Erro ao enviar resposta:', errorText);
+            mostrarNotificacao(`❌ Erro: ${errorText}`, 'error');
+        }
+    } catch (error) {
+        console.error('💥 Erro de conexão:', error);
+        mostrarNotificacao('❌ Erro de conexão ao enviar resposta', 'error');
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+
+// 🔥 SISTEMA DE NOTIFICAÇÕES
+function mostrarNotificacao(mensagem, tipo = 'info') {
+    const tipos = {
+        success: 'bg-green-500 border-green-600',
+        error: 'bg-red-500 border-red-600',
+        info: 'bg-blue-500 border-blue-600'
+    };
+    
+    const notificacaoHTML = `
+        <div class="fixed top-4 right-4 z-50 animate-slide-in-right">
+            <div class="${tipos[tipo]} text-white px-6 py-3 rounded-lg shadow-lg border-l-4 max-w-sm">
+                <div class="flex items-center gap-3">
+                    <span class="text-lg">${tipo === 'success' ? '✅' : tipo === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span class="font-medium">${mensagem}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', notificacaoHTML);
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        const notificacao = document.querySelector('.animate-slide-in-right');
+        if (notificacao) notificacao.remove();
+    }, 5000);
+} // <-- FECHA A FUNÇÃO mostrarNotificacao
+
+// --- Inicialização de Roteamento ---
+window.addEventListener('hashchange', async function() {
+    if (currentUser.token) {
+        const targetPage = window.location.hash.substring(1) || 'dashboard';
+        await renderPage(targetPage);
+    }
+}); // <-- FECHA window.addEventListener
+
+// --- Inicialização Global ---
+window.onload = function() {
+    // Verificar tema
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    
+    renderApp();
+    console.log("Sistema FeedEduc Inicializado.");
+}; // <-- FECHA window.onload function
+
+
+
+
+
+
+</script>   
+
+</body>
+
+</html>

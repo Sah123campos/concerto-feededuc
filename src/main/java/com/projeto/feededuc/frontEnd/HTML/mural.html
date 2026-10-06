@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedEduc - Mural de Feedbacks</title>
+    <link rel="stylesheet" href="../CSS/mural.css">
+    <link rel="icon" type="image/x-icon" href="../IMAGE/logo sem fundo.png">
+    <style>
+        .error-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ff4444;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            animation: fadeInOut 5s forwards;
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            animation: fadeInOut 3s forwards;
+        }
+
+        .feedback-empty {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        #user-type-display {
+            padding: 12px 20px;
+            color: #fff;
+            border-top: 1px solid #003f5c;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Posicionamento do VLibras */
+        [vw] {
+            position: fixed !important;
+            top: 20px !important;
+            right: 90px !important;
+            z-index: 999 !important;
+            transform: scale(0.85) !important;
+            transform-origin: top right !important;
+        }
+
+        [vw-access-button] {
+            position: relative !important;
+            cursor: move !important;
+        }
+
+        /* Plugin wrapper arrastável */
+        [vw-plugin-wrapper] {
+            position: fixed !important;
+            cursor: move !important;
+            z-index: 9999 !important;
+            transform-origin: top center !important;
+        }
+
+        /* Tornar o plugin arrastável */
+        .vw-plugin-wrapper-draggable {
+            cursor: move !important;
+        }
+
+        /* Mobile: manter VLibras à direita (padrão) */
+        @media (max-width: 768px) {
+            [vw] {
+                right: 90px !important;
+                left: auto !important;
+                transform-origin: top right !important;
+            }
+        }
+        
+        /* Posicionamento do UserWay */
+        [data-userway-account],
+        .userway-widget,
+        #userway-widget,
+        iframe[src*="userway"],
+        div[id*="userway"],
+        div[class*="userway"] {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 1000 !important;
+        }
+        
+        .feedback { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .tipo-critica { background: #ffe5e5; border-left: 5px solid #e74c3c; }
+        .tipo-elogio { background: #e5ffe5; border-left: 5px solid #27ae60; }
+        .tipo-sugestao { background: #fffbe5; border-left: 5px solid #f1c40f; }
+        .tipo { font-weight: bold; }
+        .feedback-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px #0001;
+            margin: 10px;
+            padding: 12px 14px;
+            min-width: 240px;
+            max-width: 300px;
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: top;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 130px;
+            overflow: hidden;
+        }
+        .feedback-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px #0002;
+        }
+        .feedback-title {
+            color: #1ca8ac;
+            font-weight: bold;
+            font-size: 0.98em;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .feedback-subtitle {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        .feedback-message {
+            color: #222;
+            font-size: 0.95em;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            flex: 0 0 0;
+        }
+        .feedback-message.expanded {
+            max-height: none;
+            margin-top: 10px;
+            overflow-y: auto;
+            padding-right: 10px;
+            flex: 1 1 auto;
+        }
+        .feedback-message.expanded::-webkit-scrollbar {
+            width: 6px;
+        }
+        .feedback-message.expanded::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .feedback-message.expanded::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        .feedback-message.expanded::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        .feedback-card-privado {
+            background: #4a3457;
+            border-left: 5px solid #4a3457;
+        }
+        .feedback-card-privado .feedback-title,
+        .feedback-card-privado .feedback-message {
+            color: #ffffff;
+        }
+        .feedback-card-privado .feedback-subtitle {
+            color: #c7b1cd;
+        }
+        .collapse-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+            user-select: none;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .collapse-icon.expanded {
+            transform: rotate(180deg);
+        }
+        .feedback-preview {
+            color: #666;
+            font-style: italic;
+            font-size: 0.8em;
+            margin-top: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .feedback-card-privado .feedback-preview {
+            color: #b8a5c0;
+        }
+        .feedback-card-privado .feedback-message.expanded::-webkit-scrollbar-track {
+            background: #3a2a45;
+        }
+        .feedback-card-privado .feedback-message.expanded::-webkit-scrollbar-thumb {
+            background: #6b5b7a;
+        }
+        .feedback-card-privado .feedback-message.expanded::-webkit-scrollbar-thumb:hover {
+            background: #8a7a9a;
+        }
+
+        /* Estilo para badges de status */
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+        .status-em_aberto { background: #fff3cd; color: #856404; }
+        .status-em_analise { background: #d1ecf1; color: #0c5460; }
+        .status-resolvido { background: #d4edda; color: #155724; }
+
+        /* Estilo para ações de admin */
+        .admin-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .btn-responder { background: #c574db; color: white; }
+        .btn-status { background: #6c757d; color: white; }
+
+        /* Estilo para respostas */
+        .feedback-response {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 3px solid #c574db;
+        }
+        .response-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1ca8ac;
+        }
+
+        /* Estilo atualizado para o menu dropdown */
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background-color: #c574db;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .dropdown-menu a,
+        .dropdown-menu button {
+            padding: 12px 20px;
+            text-align: left;
+            text-decoration: none;
+            color: #fff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .dropdown-menu a:hover,
+        .dropdown-menu button:hover {
+            background-color: #003f5c;
+        }
+
+        /* Menu lateral no mobile */
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                position: fixed;
+                top: 0;
+                right: 0;
+                left: auto;
+                bottom: 0;
+                width: 70vw;
+                max-width: 320px;
+                height: 100vh;
+                padding-top: 70px;
+                display: flex;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+            .dropdown-menu.open {
+                transform: translateX(0);
+            }
+        }
+
+        /* Botão de logout no header */
+        .header-logout-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            padding: 10px;
+        }
+
+        /* Container de filtros */
+        .filters-container {
+            display: none;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Estrelas de avaliação */
+        .feedback-rating {
+            margin: 10px 0;
+        }
+        .star-filled { color: #ffc107; }
+        .star-empty { color: #ddd; }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container" style="position: relative;">
+            <img src="../IMAGE/logo sem fundo.png" alt="Logo do FeedEduc" class="logo" id="menu-toggle" aria-haspopup="true" aria-expanded="false">
+            <div id="dropdown-menu" class="dropdown-menu">
+                <a href="telaInicial.html">Início</a>
+                <a href="Feedback.html">Novo Feedback</a>
+                <div id="user-type-display"></div>
+                <button id="dropdown-logout-btn" class="logout-btn">Sair</button>
+            </div>
+        </div>
+        <nav role="navigation" aria-label="Navegação principal">
+            <a href="telaInicial.html">Início</a>
+            <span aria-hidden="true">/</span>
+            <a href="Feedback.html">Novo Feedback</a>
+            <span aria-hidden="true">/</span>
+            <a href="mural.html" aria-current="page">Mural</a>
+        </nav>
+        
+        <!-- Botão de logout no header -->
+        <button id="header-logout-btn" class="header-logout-btn">
+            🚪 Sair
+        </button>
+    </header>
+    
+    <main role="main">
+        <!-- Container de filtros -->
+        <div class="filters-container" id="filters-container">
+            <label for="filter-setor">Filtrar por setor:</label>
+            <select id="filter-setor" class="filter-select">
+                <option value="">Todos os setores</option>
+                <option value="Professor">Professor</option>
+                <option value="Limpeza">Limpeza</option>
+                <!-- ... outros setores -->
+            </select>
+            
+            <label for="filter-status">Filtrar por status:</label>
+            <select id="filter-status" class="filter-select">
+                <option value="">Todos os status</option>
+                <option value="EM_ABERTO">Em Aberto</option>
+                <option value="EM_ANALISE">Em Análise</option>
+                <option value="RESOLVIDO">Resolvido</option>
+            </select>
+            
+            <label for="filter-privacidade">Filtrar por privacidade:</label>
+            <select id="filter-privacidade" class="filter-select">
+                <option value="">Todos</option>
+                <option value="publico">Público</option>
+                <option value="privado">Privado</option>
+            </select>
+        </div>
+
+        <!-- Container dos feedbacks -->
+        <div id="mural-container" role="region" aria-label="Mural de feedbacks">
+            <div class="loading">Carregando feedbacks...</div>
+        </div>
+    </main>
+
+    <!-- VLibras Widget -->
+    <div vw class="enabled" role="complementary" aria-label="Tradutor VLibras">
+        <div vw-access-button class="active" aria-label="Abrir tradutor VLibras"></div>
+        <div vw-plugin-wrapper>
+          <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+        // Tornar o VLibras arrastável
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const pluginWrapper = document.querySelector('[vw-plugin-wrapper]');
+                
+                if (pluginWrapper) {
+                    let isDragging = false;
+                    let currentX;
+                    let currentY;
+                    let initialX;
+                    let initialY;
+                    let xOffset = 0;
+                    let yOffset = 0;
+
+                    pluginWrapper.addEventListener('mousedown', dragStart);
+                    document.addEventListener('mousemove', drag);
+                    document.addEventListener('mouseup', dragEnd);
+
+                    pluginWrapper.addEventListener('touchstart', dragStart);
+                    document.addEventListener('touchmove', drag);
+                    document.addEventListener('touchend', dragEnd);
+
+                    function dragStart(e) {
+                        const target = e.target.closest('[vw-plugin-wrapper]');
+                        if (!target) return;
+
+                        if (e.type === 'touchstart') {
+                            initialX = e.touches[0].clientX - xOffset;
+                            initialY = e.touches[0].clientY - yOffset;
+                        } else {
+                            initialX = e.clientX - xOffset;
+                            initialY = e.clientY - initialY;
+                        }
+
+                        isDragging = true;
+                        pluginWrapper.classList.add('vw-plugin-wrapper-draggable');
+                    }
+
+                    function drag(e) {
+                        if (isDragging) {
+                            e.preventDefault();
+                            
+                            if (e.type === 'touchmove') {
+                                currentX = e.touches[0].clientX - initialX;
+                                currentY = e.touches[0].clientY - initialY;
+                            } else {
+                                currentX = e.clientX - initialX;
+                                currentY = e.clientY - initialY;
+                            }
+
+                            xOffset = currentX;
+                            yOffset = currentY;
+
+                            setTranslate(currentX, currentY, pluginWrapper);
+                        }
+                    }
+
+                    function dragEnd(e) {
+                        isDragging = false;
+                        pluginWrapper.classList.remove('vw-plugin-wrapper-draggable');
+                    }
+
+                    function setTranslate(xPos, yPos, el) {
+                        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0) scale(0.9)`;
+                    }
+                }
+            }, 1000);
+        });
+    </script>
+    
+    <!-- UserWay Widget - Configuração Corrigida -->
+    <script>
+        (function(d){
+            var s = d.createElement("script");
+            s.setAttribute("data-account", "USERWAY_ACCOUNT_ID");
+            s.setAttribute("data-language", "pt-br");
+            s.setAttribute("data-position", "top-right");
+            s.setAttribute("data-background", "#005792");
+            s.setAttribute("data-size", "48px");
+            s.setAttribute("data-mobile", "true");
+            s.setAttribute("data-hide-mobile", "false");
+            s.setAttribute("data-close-esc", "true");
+            s.setAttribute("data-close-outside", "true");
+            s.src = "https://cdn.userway.org/widget.js";
+            (d.body || d.head).appendChild(s);
+        })(document);
+    </script>
+
+    <script>
+        const BACKEND_URL = 'http://localhost:8080';
+        let todosFeedbacks = [];
+        let usuarioAtual = null;
+
+        // 🔥 INICIALIZAÇÃO COM VERIFICAÇÃO DE DOM
+        async function inicializarAplicacao() {
+            console.log('🔐 Iniciando mural...');
+            
+            // 🔥 AGUARDAR O DOM ESTAR COMPLETAMENTE CARREGADO
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', await executarInicializacao);
+            } else {
+                await executarInicializacao();
+            }
+        }
+
+        // 🔥 FUNÇÃO PRINCIPAL DE INICIALIZAÇÃO
+        async function executarInicializacao() {
+            console.log('🏗️ DOM carregado, verificando elementos...');
+            
+            // 🔥 VERIFICAR SE ELEMENTOS EXISTEM ANTES DE CONTINUAR
+            if (!verificarElementosDOM()) {
+                console.error('❌ Elementos do DOM não encontrados!');
+                mostrarErro('Erro ao carregar a página. Elementos essenciais não encontrados.');
+                return;
+            }
+
+            const token = sessionStorage.getItem('userToken');
+            
+            if (!token) {
+                mostrarErro('Sessão expirada. Redirecionando para login...');
+                setTimeout(() => window.location.href = 'login_cpf.html', 2000);
+                return;
+            }
+
+            usuarioAtual = { 
+                token: token,
+                role: sessionStorage.getItem('userRole') || 'ALUNO',
+                id: sessionStorage.getItem('userId') || '',
+                login: sessionStorage.getItem('userLogin') || ''
+            };
+
+            console.log('👤 Usuário logado:', usuarioAtual);
+
+            try {
+                await carregarFeedbacks();
+                inicializarFiltros();
+                atualizarInterfaceUsuario();
+                inicializarBotoesLogout();
+                inicializarMenuDropdown();
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                mostrarErro('Erro ao carregar a página: ' + error.message);
+            }
+        }
+
+        // 🔥 VERIFICAR SE ELEMENTOS DO DOM EXISTEM
+        function verificarElementosDOM() {
+            const elementosNecessarios = [
+                'mural-container',
+                'menu-toggle',
+                'dropdown-menu',
+                'header-logout-btn'
+            ];
+
+            for (const elementoId of elementosNecessarios) {
+                if (!document.getElementById(elementoId)) {
+                    console.error(`❌ Elemento não encontrado: ${elementoId}`);
+                    return false;
+                }
+            }
+
+            console.log('✅ Todos os elementos do DOM encontrados');
+            return true;
+        }
+
+        // 🔥 CARREGAR FEEDBACKS COM VERIFICAÇÕES
+        async function carregarFeedbacks() {
+            try {
+                console.log('📥 Carregando feedbacks para:', usuarioAtual.role);
+                
+                // 🔥 ATUALIZAR ESTADO DE CARREGAMENTO
+                const container = document.getElementById('mural-container');
+                if (container) {
+                    container.innerHTML = '<div class="loading">Carregando feedbacks...</div>';
+                }
+                
+                const response = await fetch(`${BACKEND_URL}/api/feedbacks`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${usuarioAtual.token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    sessionStorage.clear();
+                    throw new Error('Sessão expirada. Faça login novamente.');
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                todosFeedbacks = await response.json();
+                console.log('✅ Feedbacks carregados:', todosFeedbacks.length, 'itens');
+                
+                const feedbacksFiltrados = aplicarRegrasVisibilidade(todosFeedbacks);
+                exibirFeedbacks(feedbacksFiltrados);
+
+            } catch (error) {
+                console.error('💥 Erro ao carregar feedbacks:', error);
+                tratarErroCarregamento(error);
+            }
+        }
+
+        // 🔥 APLICAR REGRAS DE VISIBILIDADE
+        function aplicarRegrasVisibilidade(feedbacks) {
+            if (usuarioAtual.role === 'ALUNO') {
+                console.log('🔒 Aplicando regras de visibilidade para ALUNO');
+                
+                return feedbacks.filter(feedback => {
+                    const isProprioFeedback = feedback.alunoId && feedback.alunoId.toString() === usuarioAtual.id;
+                    const isPublico = !feedback.privado;
+                    return isProprioFeedback || isPublico;
+                });
+            }
+            
+            console.log('👁️  Visualização total para:', usuarioAtual.role);
+            return feedbacks;
+        }
+
+        // 🔥 EXIBIR FEEDBACKS COM VERIFICAÇÃO ROBUSTA
+        function exibirFeedbacks(feedbacks) {
+            const container = document.getElementById('mural-container');
+            
+            // 🔥 VERIFICAÇÃO DUPLA DO CONTAINER
+            if (!container) {
+                console.error('❌ Elemento mural-container não encontrado! Tentando recuperar...');
+                
+                // Tentar encontrar novamente após um delay
+                setTimeout(() => {
+                    const recoveredContainer = document.getElementById('mural-container');
+                    if (recoveredContainer) {
+                        console.log('✅ Container recuperado, exibindo feedbacks...');
+                        exibirFeedbacks(feedbacks);
+                    } else {
+                        console.error('❌ Container não pôde ser recuperado');
+                        document.body.innerHTML = `
+                            <div style="padding: 20px; text-align: center; color: red;">
+                                <h2>Erro crítico</h2>
+                                <p>Elemento da página não carregou corretamente.</p>
+                                <button onclick="location.reload()" style="padding: 10px 20px; margin: 10px;">
+                                    Recarregar Página
+                                </button>
+                            </div>
+                        `;
+                    }
+                }, 100);
+                return;
+            }
+            
+            if (!feedbacks || feedbacks.length === 0) {
+                let mensagemVazio = '';
+                
+                if (usuarioAtual.role === 'ALUNO') {
+                    mensagemVazio = `
+                        <div class="feedback-empty">
+                            <h3>Nenhum feedback disponível</h3>
+                            <p>Você ainda não tem feedbacks para visualizar.</p>
+                            <p><strong>Como aluno, você vê:</strong></p>
+                            <ul style="text-align: left; display: inline-block;">
+                                <li>Seus próprios feedbacks (privados e públicos)</li>
+                                <li>Feedbacks públicos de outros alunos</li>
+                            </ul>
+                            <br>
+                            <a href="Feedback.html" style="color: #1ca8ac; text-decoration: underline;">
+                                Enviar meu primeiro feedback
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    mensagemVazio = `
+                        <div class="feedback-empty">
+                            <h3>Nenhum feedback encontrado</h3>
+                            <p>Nenhum feedback foi enviado ainda.</p>
+                            <a href="Feedback.html" style="color: #1ca8ac; text-decoration: underline;">
+                                Ver página de envio de feedback
+                            </a>
+                        </div>
+                    `;
+                }
+                
+                container.innerHTML = mensagemVazio;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            feedbacks.forEach(feedback => {
+                const feedbackElement = criarElementoFeedback(feedback);
+                container.appendChild(feedbackElement);
+            });
+
+            console.log('📊 Feedbacks exibidos:', feedbacks.length);
+        }
+
+        // 🔥 TRATAR ERRO DE CARREGAMENTO
+        function tratarErroCarregamento(error) {
+            if (error.message.includes('Sessão expirada')) {
+                sessionStorage.clear();
+                mostrarErro('Sessão expirada. Redirecionando para login...');
+                setTimeout(() => window.location.href = 'login_cpf.html', 2000);
+            } else {
+                mostrarErro('Erro ao carregar feedbacks: ' + error.message);
+                
+                const container = document.getElementById('mural-container');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="feedback-empty">
+                            <h3>Erro ao carregar feedbacks</h3>
+                            <p>${error.message}</p>
+                            <button onclick="carregarFeedbacks()" style="padding: 10px 20px; background: #c574db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Tentar Novamente
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // 🔥 CRIAR ELEMENTO FEEDBACK
+        function criarElementoFeedback(feedback) {
+            const isPrivado = feedback.privado;
+            const hasNota = feedback.nota && feedback.nota > 0;
+            const hasResposta = feedback.resposta && feedback.resposta.conteudo;
+            
+            const isProprioFeedback = usuarioAtual.role === 'ALUNO' && 
+                                     feedback.alunoId && 
+                                     feedback.alunoId.toString() === usuarioAtual.id;
+            
+            const podeResponder = podeResponderFeedback(feedback);
+            const isStaff = ['PROFESSOR', 'GESTOR', 'ADMIN'].includes(usuarioAtual.role);
+            
+            const card = document.createElement('div');
+            card.className = `feedback-card ${isPrivado ? 'feedback-card-privado' : ''}`;
+            card.setAttribute('data-feedback-id', feedback.id);
+
+            // Formatar data
+            const dataEnvio = new Date(feedback.dataEnvio).toLocaleDateString('pt-BR');
+
+            // Criar estrelas da avaliação
+            let estrelasHTML = '';
+            if (hasNota) {
+                estrelasHTML = `
+                    <div class="feedback-rating">
+                        ${Array.from({length: 5}, (_, i) => 
+                            `<span class="${i < feedback.nota ? 'star-filled' : 'star-empty'}">★</span>`
+                        ).join('')}
+                        <span>(${feedback.nota}/5)</span>
+                    </div>
+                `;
+            }
+
+            // Criar badge de status
+            const statusText = {
+                'EM_ABERTO': 'Em Aberto',
+                'EM_ANALISE': 'Em Análise', 
+                'RESOLVIDO': 'Resolvido'
+            }[feedback.status] || feedback.status;
+
+            // Indicador de feedback próprio
+            let indicadorProprioHTML = '';
+            if (usuarioAtual.role === 'ALUNO' && isProprioFeedback) {
+                indicadorProprioHTML = `<span style="color: #1ca8ac; font-weight: bold;"> • ✍️ Seu feedback</span>`;
+            }
+
+            // Ações condicionais
+            let adminActionsHTML = '';
+            if (isStaff || podeResponder) {
+                adminActionsHTML = `
+                    <div class="admin-actions">
+                        ${podeResponder ? `
+                            <button class="action-btn btn-responder" onclick="responderFeedback(${feedback.id})">
+                                ${hasResposta ? '✏️ Editar Resposta' : '💬 Responder'}
+                            </button>
+                        ` : ''}
+                        ${isStaff ? `
+                            <button class="action-btn btn-status" onclick="mudarStatusFeedback(${feedback.id})">
+                                🔄 Alterar Status
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            // Resposta se existir
+            let respostaHTML = '';
+            if (hasResposta) {
+                const dataResposta = new Date(feedback.resposta.dataResposta).toLocaleDateString('pt-BR');
+                respostaHTML = `
+                    <div class="feedback-response">
+                        <div class="response-header">
+                            📝 Resposta de ${feedback.resposta.responsavelNome || 'Responsável'}:
+                        </div>
+                        <div>${feedback.resposta.conteudo}</div>
+                        <div style="font-size: 0.8em; color: #666; margin-top: 5px;">
+                            Respondido em: ${dataResposta}
+                            ${podeResponder ? ` • <button onclick="editarResposta(${feedback.id})" style="background: none; border: none; color: #1ca8ac; cursor: pointer; text-decoration: underline;">Editar</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="feedback-title">
+                    <span>${feedback.titulo}</span>
+                    <span class="status-badge status-${feedback.status.toLowerCase()}">
+                        ${statusText}
+                    </span>
+                </div>
+                <div class="feedback-subtitle">
+                    📍 ${feedback.setorAlvo} • 📅 ${dataEnvio}
+                    ${isPrivado ? ' • 🔒 Privado' : ' • 🌐 Público'}
+                    ${indicadorProprioHTML}
+                </div>
+                <div class="feedback-preview">
+                    ${feedback.conteudo.substring(0, 100)}${feedback.conteudo.length > 100 ? '...' : ''}
+                </div>
+                <div class="feedback-message">
+                    <div class="feedback-content">
+                        <p><strong>Descrição:</strong></p>
+                        <p>${feedback.conteudo}</p>
+                        ${estrelasHTML}
+                        ${respostaHTML}
+                        ${adminActionsHTML}
+                    </div>
+                </div>
+                <div class="collapse-icon">▼</div>
+            `;
+
+            // Toggle expandir/recolher
+            card.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('action-btn') && !e.target.closest('.action-btn')) {
+                    const message = this.querySelector('.feedback-message');
+                    const icon = this.querySelector('.collapse-icon');
+                    const isExpanded = message.classList.contains('expanded');
+
+                    if (isExpanded) {
+                        message.classList.remove('expanded');
+                        icon.classList.remove('expanded');
+                        this.style.height = '130px';
+                    } else {
+                        message.classList.add('expanded');
+                        icon.classList.add('expanded');
+                        this.style.height = 'auto';
+                    }
+                }
+            });
+
+            return card;
+        }
+
+        // 🔥 VERIFICAR PERMISSÃO PARA RESPONDER
+        function podeResponderFeedback(feedback) {
+            const userRole = usuarioAtual.role;
+            
+            if (userRole === 'ADMIN' || userRole === 'GESTOR') {
+                return true;
+            }
+
+            if (userRole === 'PROFESSOR') {
+                return true;
+            }
+
+            return false;
+        }
+
+        // 🔥 INICIALIZAR FILTROS
+        function inicializarFiltros() {
+            const filtersContainer = document.getElementById('filters-container');
+            
+            if (!filtersContainer) {
+                console.log('⚠️ Container de filtros não encontrado - isso é normal para alunos');
+                return;
+            }
+
+            const podeVerFiltros = ['PROFESSOR', 'GESTOR', 'ADMIN'].includes(usuarioAtual.role);
+            
+            if (podeVerFiltros) {
+                filtersContainer.style.display = 'flex';
+                
+                const setorFilter = document.getElementById('filter-setor');
+                const statusFilter = document.getElementById('filter-status');
+                const privacidadeFilter = document.getElementById('filter-privacidade');
+                
+                if (setorFilter) setorFilter.addEventListener('change', aplicarFiltros);
+                if (statusFilter) statusFilter.addEventListener('change', aplicarFiltros);
+                if (privacidadeFilter) privacidadeFilter.addEventListener('change', aplicarFiltros);
+                
+                console.log('🔧 Filtros habilitados para:', usuarioAtual.role);
+            } else {
+                filtersContainer.style.display = 'none';
+            }
+        }
+
+        // 🔥 APLICAR FILTROS
+        function aplicarFiltros() {
+            const setorFiltro = document.getElementById('filter-setor')?.value || '';
+            const statusFiltro = document.getElementById('filter-status')?.value || '';
+            const privacidadeFiltro = document.getElementById('filter-privacidade')?.value || '';
+
+            let feedbacksFiltrados = aplicarRegrasVisibilidade(todosFeedbacks);
+
+            if (['PROFESSOR', 'GESTOR', 'ADMIN'].includes(usuarioAtual.role)) {
+                feedbacksFiltrados = feedbacksFiltrados.filter(feedback => {
+                    const matchSetor = !setorFiltro || feedback.setorAlvo === setorFiltro;
+                    const matchStatus = !statusFiltro || feedback.status === statusFiltro;
+                    const matchPrivacidade = !privacidadeFiltro || 
+                        (privacidadeFiltro === 'publico' && !feedback.privado) ||
+                        (privacidadeFiltro === 'privado' && feedback.privado);
+
+                    return matchSetor && matchStatus && matchPrivacidade;
+                });
+            }
+
+            exibirFeedbacks(feedbacksFiltrados);
+        }
+
+        // 🔥 ATUALIZAR INTERFACE DO USUÁRIO
+        function atualizarInterfaceUsuario() {
+            const userRole = usuarioAtual.role;
+            const userLogin = usuarioAtual.login;
+            const userTypeDisplay = document.getElementById('user-type-display');
+            
+            const roleText = {
+                'ALUNO': '👤 Aluno',
+                'PROFESSOR': '👨‍🏫 Professor', 
+                'GESTOR': '👔 Gestor',
+                'ADMIN': '⚙️ Administrador'
+            }[userRole] || '👤 Usuário';
+
+            if (userTypeDisplay) {
+                userTypeDisplay.textContent = `${roleText} - ${userLogin}`;
+            }
+        }
+
+        // 🔥 INICIALIZAR BOTÕES DE LOGOUT
+        function inicializarBotoesLogout() {
+            const headerLogoutBtn = document.getElementById('header-logout-btn');
+            if (headerLogoutBtn) {
+                headerLogoutBtn.addEventListener('click', fazerLogout);
+                console.log('✅ Botão header logout inicializado');
+            }
+            
+            const dropdownLogoutBtn = document.getElementById('dropdown-logout-btn');
+            if (dropdownLogoutBtn) {
+                dropdownLogoutBtn.addEventListener('click', fazerLogout);
+                console.log('✅ Botão dropdown logout inicializado');
+            }
+        }
+
+        // 🔥 INICIALIZAR MENU DROPDOWN
+        function inicializarMenuDropdown() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+
+            if (menuToggle && dropdownMenu) {
+                menuToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+                    menuToggle.setAttribute('aria-expanded', !isExpanded);
+                    
+                    if (window.matchMedia('(max-width: 768px)').matches) {
+                        dropdownMenu.classList.toggle('open', !isExpanded);
+                    } else {
+                        dropdownMenu.style.display = isExpanded ? 'none' : 'flex';
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!menuToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        if (window.matchMedia('(max-width: 768px)').matches) {
+                            dropdownMenu.classList.remove('open');
+                        } else {
+                            dropdownMenu.style.display = 'none';
+                        }
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        }
+
+        // 🔥 FUNÇÃO DE LOGOUT
+        async function fazerLogout() {
+            console.log('🚪 Iniciando logout...');
+            
+            const confirmar = confirm('Deseja realmente sair?');
+            if (!confirmar) return;
+            
+            try {
+                await fetch(`${BACKEND_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${usuarioAtual.token}`
+                    }
+                });
+            } catch (error) {
+                console.log('ℹ️ Endpoint de logout não disponível, continuando...');
+            } finally {
+                sessionStorage.removeItem('userToken');
+                sessionStorage.removeItem('userRole');
+                sessionStorage.removeItem('userId');
+                sessionStorage.removeItem('userLogin');
+                
+                console.log('🧹 sessionStorage limpo');
+                mostrarSucesso('Logout realizado com sucesso!');
+                
+                window.location.href = 'login_cpf.html';
+            }
+        }
+
+        // 🔥 FUNÇÕES DE RESPOSTA E STATUS
+        async function responderFeedback(feedbackId) {
+            const feedback = todosFeedbacks.find(f => f.id === feedbackId);
+            if (!feedback) return;
+
+            if (!podeResponderFeedback(feedback)) {
+                mostrarErro('Você não tem permissão para responder este feedback.');
+                return;
+            }
+
+            const respostaAtual = feedback.resposta ? feedback.resposta.conteudo : '';
+            const resposta = prompt(
+                `Digite sua resposta para o feedback "${feedback.titulo}":`,
+                respostaAtual
+            );
+
+            if (resposta && resposta.trim()) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/feedbacks/${feedbackId}/responder`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${usuarioAtual.token}`
+                        },
+                        body: JSON.stringify({
+                            conteudo: resposta.trim(),
+                            responsavelNome: usuarioAtual.login || 'Usuário'
+                        })
+                    });
+
+                    if (response.ok) {
+                        mostrarSucesso('Resposta enviada com sucesso!');
+                        await carregarFeedbacks();
+                    } else {
+                        const errorText = await response.text();
+                        throw new Error(errorText);
+                    }
+                } catch (error) {
+                    mostrarErro('Erro ao responder feedback: ' + error.message);
+                }
+            }
+        }
+
+        async function mudarStatusFeedback(feedbackId) {
+            const feedback = todosFeedbacks.find(f => f.id === feedbackId);
+            if (!feedback) return;
+
+            const currentStatus = feedback.status;
+            const novoStatus = prompt(
+                `Alterar status do feedback "${feedback.titulo}":\n\n` +
+                `Status atual: ${currentStatus}\n\n` +
+                `Novo status (EM_ABERTO, EM_ANALISE, RESOLVIDO):`,
+                currentStatus
+            );
+
+            if (novoStatus && ['EM_ABERTO', 'EM_ANALISE', 'RESOLVIDO'].includes(novoStatus.toUpperCase())) {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/feedbacks/${feedbackId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${usuarioAtual.token}`
+                        },
+                        body: JSON.stringify({
+                            status: novoStatus.toUpperCase()
+                        })
+                    });
+
+                    if (response.ok) {
+                        mostrarSucesso('Status atualizado com sucesso!');
+                        await carregarFeedbacks();
+                    } else {
+                        const errorText = await response.text();
+                        throw new Error(errorText);
+                    }
+                } catch (error) {
+                    mostrarErro('Erro ao alterar status: ' + error.message);
+                }
+            } else if (novoStatus) {
+                mostrarErro('Status inválido. Use: EM_ABERTO, EM_ANALISE ou RESOLVIDO');
+            }
+        }
+
+        async function editarResposta(feedbackId) {
+            await responderFeedback(feedbackId);
+        }
+
+        function mostrarErro(mensagem) {
+            const div = document.createElement('div');
+            div.className = 'error-message';
+            div.textContent = mensagem;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 5000);
+        }
+
+        function mostrarSucesso(mensagem) {
+            const div = document.createElement('div');
+            div.className = 'success-message';
+            div.textContent = mensagem;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        // 🔥 INICIAR APLICAÇÃO
+        inicializarAplicacao();
+    </script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FeedEduc - Enviar Feedback</title>
+    <link rel="stylesheet" href="../CSS/Feedback.css">
+    <link rel="icon" type="image/x-icon" href="../IMAGE/logo sem fundo.png">
+    <style>
+        /* Posicionamento do VLibras */
+        [vw] {
+            position: fixed !important;
+            top: 20px !important;
+            right: 90px !important;
+            z-index: 999 !important;
+            transform: scale(0.85) !important;
+            transform-origin: top right !important;
+        }
+
+        [vw-access-button] {
+            position: relative !important;
+            cursor: move !important;
+        }
+
+        /* Plugin wrapper arrastável */
+        [vw-plugin-wrapper] {
+            position: fixed !important;
+            cursor: move !important;
+            z-index: 9999 !important;
+            transform-origin: top center !important;
+        }
+
+        /* Tornar o plugin arrastável */
+        .vw-plugin-wrapper-draggable {
+            cursor: move !important;
+        }
+
+        /* Mobile: manter VLibras à direita (padrão) */
+        @media (max-width: 768px) {
+            [vw] {
+                right: 90px !important;
+                left: auto !important;
+                transform-origin: top right !important;
+            }
+        }
+        
+        /* Posicionamento do UserWay */
+        [data-userway-account],
+        .userway-widget,
+        #userway-widget,
+        iframe[src*="userway"],
+        div[id*="userway"],
+        div[class*="userway"] {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 1000 !important;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Estilo atualizado para o menu dropdown */
+        .dropdown-menu {
+            position: absolute;
+            top: 60px; /* Ajuste para ficar abaixo do ícone */
+            left: 10px;
+            background-color: #c574db; /* Cor de fundo combinando com o tema */
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .dropdown-menu a,
+        .dropdown-menu button {
+            padding: 12px 20px;
+            text-align: left;
+            text-decoration: none;
+            color: #fff; /* Texto branco para contraste */
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
+
+        .dropdown-menu a:hover,
+        .dropdown-menu button:hover {
+            background-color: #003f5c; /* Cor de destaque ao passar o mouse */
+        }
+
+        /* Menu lateral no mobile */
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                position: fixed;
+                top: 0;
+                right: 0;
+                left: auto;
+                bottom: 0;
+                width: 70vw;
+                max-width: 320px;
+                height: 100vh;
+                padding-top: 70px;
+                display: flex; /* mantemos flex; controle por transform */
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+            .dropdown-menu.open {
+                transform: translateX(0);
+            }
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <div class="logo-container" style="position: relative;">
+            <img src="../IMAGE/logo sem fundo.png" alt="Logo do FeedEduc" class="logo" id="menu-toggle" aria-haspopup="true" aria-expanded="false">
+            <div id="dropdown-menu" class="dropdown-menu">
+                <a href="telaInicial.html">Início</a>
+                <a href="Feedback.html">Feedback</a>
+                <a href="mural.html">Mural</a>
+                <button id="dropdown-logout-btn" class="logout-btn">Logout</button>
+            </div>
+        </div>
+        <nav role="navigation" aria-label="Navegação principal">
+            <a href="telaInicial.html">Início</a>
+            <span aria-hidden="true">/</span>
+            <a href="Feedback.html" aria-current="page">Feedback</a>
+            <span aria-hidden="true">/</span>
+            <a href="mural.html">Mural</a>
+        </nav>
+    </header>
+    
+    <main class="feedback-main" role="main">
+        <div class="feedback-container">
+            <div class="feedback-types">
+                <div class="main-option" data-target="type-options" role="button" tabindex="0" aria-expanded="false" aria-controls="type-options">Tipo de Feedback</div>
+                <div class="sub-options" id="type-options" role="listbox" aria-label="Tipos de feedback disponíveis">
+                    <div class="sub-option" role="option" tabindex="0" data-value="sugestão">sugestão</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="elogio">elogio</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="crítica">crítica</div>
+                </div>
+            </div>
+
+            <div class="feedback-categories">
+                <div class="main-option" data-target="category-options" role="button" tabindex="0" aria-expanded="false" aria-controls="category-options">Destinatário</div>
+                <div class="sub-options" id="category-options" role="listbox" aria-label="Categorias disponíveis">
+                    <div class="sub-option" role="option" tabindex="0" data-value="professor">professor</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="ambiente">ambiente</div>
+                    <div class="sub-option" role="option" tabindex="0" data-value="funcionario">funcionario</div>
+                </div>
+            </div>
+
+            <div class="feedback-nome">
+                <input id="nome" type="text" placeholder="Nome do professor, local, etc." autocomplete="off" aria-label="Nome do professor, local ou pessoa relacionada ao feedback">
+                <div class="input-icon" aria-hidden="true">👨‍🏫</div>
+            </div>
+
+            <div class="feedback-input">
+                <textarea id="mensagem" placeholder="Digite o seu feedback" aria-label="Mensagem do feedback" rows="5"></textarea>
+            </div>
+
+            <div class="feedback-options">
+                <div class="feedback-options-top">
+                    <div class="privacy-container">
+                        <div class="privacy-header">
+                            <p class="privacy-label">Visibilidade:</p>
+                            <div class="privacy-scroller" role="radiogroup" aria-label="Opções de visibilidade do feedback">
+                                <div class="privacy-option">
+                                    <input type="radio" id="privado" name="privacy" checked aria-describedby="privacy-description privado-desc">
+                                    <label for="privado">privado</label>
+                                </div>
+                                <div class="privacy-option">
+                                    <input type="radio" id="publico" name="privacy" aria-describedby="privacy-description publico-desc">
+                                    <label for="publico">público</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="privacy-description" class="sr-only">
+                            Escolha a visibilidade do seu feedback. Privado: visível apenas para o setor/destinatário responsável e coordenação. Público: visível para todos os usuários.
+                        </div>
+                        <div class="privacy-descriptions">
+                            <div id="privado-desc" class="privacy-desc" aria-live="polite">
+                                <strong>Visível para:</strong> Apenas o setor/destinatário responsável e coordenação/administração.
+                                <br><strong>Ideal para:</strong> Críticas sensíveis e pedidos de ajuda ou relatos pessoais.
+                            </div>
+                            <div id="publico-desc" class="privacy-desc" aria-live="polite" style="display: none;">
+                                <strong>Visível para:</strong> Todos os usuários (toda a escola/turma).
+                                <br><strong>Ideal para:</strong> Elogios que valorizam setores/pessoas e sugestões construtivas que podem inspirar melhorias coletivas.
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" onclick="adicionarFeedback()" type="button" aria-label="Enviar feedback">enviar</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../JS/feedback.js"></script>
+    
+    <!-- VLibras Widget -->
+    <div vw class="enabled" role="complementary" aria-label="Tradutor VLibras">
+        <div vw-access-button class="active" aria-label="Abrir tradutor VLibras"></div>
+        <div vw-plugin-wrapper>
+          <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+        // Tornar o VLibras arrastável
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const pluginWrapper = document.querySelector('[vw-plugin-wrapper]');
+                
+                if (pluginWrapper) {
+                    let isDragging = false;
+                    let currentX;
+                    let currentY;
+                    let initialX;
+                    let initialY;
+                    let xOffset = 0;
+                    let yOffset = 0;
+
+                    pluginWrapper.addEventListener('mousedown', dragStart);
+                    document.addEventListener('mousemove', drag);
+                    document.addEventListener('mouseup', dragEnd);
+
+                    pluginWrapper.addEventListener('touchstart', dragStart);
+                    document.addEventListener('touchmove', drag);
+                    document.addEventListener('touchend', dragEnd);
+
+                    function dragStart(e) {
+                        const target = e.target.closest('[vw-plugin-wrapper]');
+                        if (!target) return;
+
+                        if (e.type === 'touchstart') {
+                            initialX = e.touches[0].clientX - xOffset;
+                            initialY = e.touches[0].clientY - yOffset;
+                        } else {
+                            initialX = e.clientX - xOffset;
+                            initialY = e.clientY - yOffset;
+                        }
+
+                        isDragging = true;
+                        pluginWrapper.classList.add('vw-plugin-wrapper-draggable');
+                    }
+
+                    function drag(e) {
+                        if (isDragging) {
+                            e.preventDefault();
+                            
+                            if (e.type === 'touchmove') {
+                                currentX = e.touches[0].clientX - initialX;
+                                currentY = e.touches[0].clientY - initialY;
+                            } else {
+                                currentX = e.clientX - initialX;
+                                currentY = e.clientY - initialY;
+                            }
+
+                            xOffset = currentX;
+                            yOffset = currentY;
+
+                            setTranslate(currentX, currentY, pluginWrapper);
+                        }
+                    }
+
+                    function dragEnd(e) {
+                        isDragging = false;
+                        pluginWrapper.classList.remove('vw-plugin-wrapper-draggable');
+                    }
+
+                    function setTranslate(xPos, yPos, el) {
+                        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0) scale(0.9)`;
+                    }
+                }
+            }, 1000);
+        });
+
+        const menuToggle = document.getElementById('menu-toggle');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        const dropdownLogoutBtn = document.getElementById('dropdown-logout-btn');
+
+        menuToggle.addEventListener('click', () => {
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', !isExpanded);
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                dropdownMenu.classList.toggle('open', !isExpanded);
+            } else {
+                dropdownMenu.style.display = isExpanded ? 'none' : 'flex';
+            }
+        });
+
+        dropdownLogoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!menuToggle.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                if (window.matchMedia('(max-width: 768px)').matches) {
+                    dropdownMenu.classList.remove('open');
+                } else {
+                    dropdownMenu.style.display = 'none';
+                }
+                menuToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+    
+    <!-- UserWay Widget - carregamento condicional (não carregar com ID placeholder) -->
+    <script>
+        (function(d){
+            var account = 'USERWAY_ACCOUNT_ID'; // substitua por seu ID real antes de habilitar
+            if (!account || account === 'USERWAY_ACCOUNT_ID') {
+                console.warn('UserWay não carregado: defina USERWAY_ACCOUNT_ID em Feedback.html para habilitar o widget.');
+                return;
+            }
+            var s = d.createElement("script");
+            s.setAttribute("data-account", account);
+            s.setAttribute("data-language", "pt-br");
+            s.setAttribute("data-position", "top-right");
+            s.setAttribute("data-background", "#005792");
+            s.setAttribute("data-size", "48px");
+            s.setAttribute("data-mobile", "true");
+            s.setAttribute("data-hide-mobile", "false");
+            s.setAttribute("data-close-esc", "true");
+            s.setAttribute("data-close-outside", "true");
+            s.src = "https://cdn.userway.org/widget.js";
+            (d.body || d.head).appendChild(s);
+        })(document);
+    </script>
+
+
+</body>
+</html>
